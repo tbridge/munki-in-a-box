@@ -8,4 +8,4 @@ The goal of this script is to deploy a basic munki repo in a simple script based
 
 This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge and numerous others who have helped me assemble this script.
 
-Questions? Comments? Suggestions? Jeers? Please email me at tom@technolutionary.
+Questions? Comments? Suggestions? Jeers? Please email me at tom@technolutionary.com
