@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge
 
-# Version: 0.1.1
+# Version: 0.1.2
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 # Approach this script like a swarm of bees: Unless you know what you are doing, keep your distance.
@@ -21,6 +21,8 @@ REPODIR=/Users/Shared/munki_repo
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webrunning=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 
+echo $webrunning
+
 # Create the repo.
 
 cd $REPOLOC
@@ -33,8 +35,8 @@ mkdir munki_repo/pkgsinfo
 chmod -R a+rX munki_repo
 
 if 
-	[ $osvers > 8 ]; then sudo ln -s /Users/Shared/munki_repo /Library/Server/Web/Data/Sites/Default
-	else exit 100 # Sorry, 10.8+ only.
+	[[ $osvers -ge 8 ]]; then sudo ln -s /Users/Shared/munki_repo /Library/Server/Web/Data/Sites/Default
+	else exit # Sorry, 10.8+ only.
 	
 fi
 
@@ -46,7 +48,7 @@ fi
 
 if
 	[ $webrunning == "STOPPED"]; then 
-	exit 101 # Sorry, turn on the webserver.	
+	exit # Sorry, turn on the webserver.	
 fi
 	
 ####
