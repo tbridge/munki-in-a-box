@@ -18,7 +18,7 @@ Directions for Use:
 
 1) Download Script  
 2) Alter Lines 19-20 to reflect your choice for munki repo name and location  
-3) Alter Line 82 to reflect your choice of AutoPKG installs  
+3) Alter Line 106 to reflect your choice of AutoPKG installs  
 4) sudo ./munkiinabox.sh
 
 Questions? Comments? Suggestions? Jeers? Please email me at tom@technolutionary.com
