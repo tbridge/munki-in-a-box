@@ -41,7 +41,7 @@ if
 fi
 
 if
-	[[ $webrunning == *STOPPED*]] eq 1; then 
+	[[ $webrunning == *STOPPED* ]]; then 
 	${LOGGER} "Could not run because the Web Service is stopped"
 	echo "Please turn on Web Services in Server.app"
 	exit 0 # Sorry, turn on the webserver.	
