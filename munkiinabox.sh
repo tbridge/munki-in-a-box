@@ -16,12 +16,44 @@
 
 # Establish our Basic Variables:
 
-REPOLOC=/Users/Shared/
-REPODIR=/Users/Shared/munki_repo
+REPOLOC="/Users/Shared/"
+REPODIR="/Users/Shared/munki_repo"
+LOGGER="/usr/bin/logger"
+MUNKILOC="/usr/local/munki"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webrunning=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 
 echo $webrunning
+
+####
+
+# Checks 
+
+####
+
+if 
+	[[ $osvers -ge 8 ]]; then sudo ln -s /Users/Shared/munki_repo /Library/Server/Web/Data/Sites/Default
+	else
+		${LOGGER} "Could not run because the version of the OS does not meet requirements"
+		echo "Sorry, this is for Mac OS 10.8 or later."
+	 	exit 0 # 10.8+ for the Web Root Location.
+	
+fi
+
+if
+	[[ $webrunning == *STOPPED*]] eq 1; then 
+	${LOGGER} "Could not run because the Web Service is stopped"
+	echo "Please turn on Web Services in Server.app"
+	exit 0 # Sorry, turn on the webserver.	
+fi
+
+if
+
+	[[ ! -f $MUNKILOC/munkiimport ]]; then
+	${LOGGER} "Could not run because Munki Tools are not installed"
+	echo "Sorry, Munki Tools are not installed."
+	exit 0 # If munki import doesn't exist, this won't work. 
+fi	
 
 # Create the repo.
 
@@ -34,22 +66,8 @@ mkdir munki_repo/pkgsinfo
 
 chmod -R a+rX munki_repo
 
-if 
-	[[ $osvers -ge 8 ]]; then sudo ln -s /Users/Shared/munki_repo /Library/Server/Web/Data/Sites/Default
-	else exit # Sorry, 10.8+ only.
-	
-fi
 
-####
-
-# Insert Section here on checking for Apache and/or web service to be running
-
-####
-
-if
-	[[ $webrunning == *STOPPED*]] eq 1; then 
-	exit # Sorry, turn on the webserver.	
-fi
+${LOGGER} "Repo Created"
 	
 ####
 
@@ -60,6 +78,8 @@ fi
 curl -L https://github.com/autopkg/autopkg/releases/download/v0.2.9/autopkg-0.2.9.pkg -o autopkg.pkg
 
 installer -pkg autopkg.pkg -target /
+
+${LOGGER} "AutoPKG Installed"
 
 ####
 
@@ -75,6 +95,8 @@ defaults write com.googlecode.munki.munkiimport editor TextWrangler.app
 defaults write com.googlecode.munki.munkiimport repo_path $REPODIR
 defaults write com.googlecode.munki.munkiimport pkginfo_extension .plist
 
+${LOGGER} "AutoPKG Configured"
+
 ####
 
 # Get some Packages and Stuff them in Munki
@@ -83,6 +105,7 @@ defaults write com.googlecode.munki.munkiimport pkginfo_extension .plist
 
 autopkg run -v AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki
 
+${LOGGER} "AutoPKG Run"
 
 ####
 
@@ -91,6 +114,8 @@ autopkg run -v AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.mu
 ####
 
 rm $REPOLOC/autopkg.pkg
+
+${LOGGER} "I put my toys away!"
 
 
 exit
