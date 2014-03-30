@@ -21,4 +21,10 @@ Directions for Use:
 3) Alter Line 106 to reflect your choice of AutoPKG installs  
 4) sudo ./munkiinabox.sh
 
+Future Features:
+
+1) Replace hard-coded AutoPKG download with current release version retrieval links  
+2) Allow check of plain apachectl for purposes of using on a non-Server.app platform.  
+3) Install Sean Kaiser's Monitoring Scripts with configuration variables passed through
+
 Questions? Comments? Suggestions? Jeers? Please email me at tom@technolutionary.com
