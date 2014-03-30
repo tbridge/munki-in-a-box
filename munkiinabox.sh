@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge
 
-# Version: 0.1.2
+# Version: 0.1.3
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 # Approach this script like a swarm of bees: Unless you know what you are doing, keep your distance.
@@ -47,7 +47,7 @@ fi
 ####
 
 if
-	[ $webrunning == "STOPPED"]; then 
+	[[ $webrunning == *STOPPED*]] eq 1; then 
 	exit # Sorry, turn on the webserver.	
 fi
 	
@@ -90,7 +90,7 @@ autopkg run -v AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.mu
 
 ####
 
-rm /Users/Shared/autopkg.pkg
+rm $REPOLOC/autopkg.pkg
 
 
 exit
