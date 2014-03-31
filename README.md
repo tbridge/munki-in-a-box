@@ -34,9 +34,9 @@ Immediate Future Plans:
 
 Other Good Suggestions:
 
-√ 1) Creation of site_default Manifest
-2) Generation of Client Configuration pkg or script
-3) Install of Munki-Report PHP
+√ 1) Creation of site_default Manifest  
+√ 2) Generation of Client Configuration pkg or script - Thanks Nick McSpadden!  
+3) Install of Munki-Report PHP  
 √ 4) Replace Munkitools requirement with install of appropriate munki elements.
 
 
