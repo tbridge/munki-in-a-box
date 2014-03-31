@@ -22,8 +22,8 @@ Directions for Use:
 
 NEW in 0.2:
 
-• AutoPKG is now downloaded from the latest trunk.
-• The site_default Manifest is established from the packages passed to autopkg.
+• AutoPKG is now downloaded from the latest trunk.  
+• The site_default Manifest is established from the packages passed to autopkg.  
 • If Munki is not installed, the script grabs the munki tools, mounts the dmg and installs munki_core and munki_admin packages from inside. 
 
 Immediate Future Plans:
