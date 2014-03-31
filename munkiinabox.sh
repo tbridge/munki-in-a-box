@@ -84,7 +84,26 @@ ${LOGGER} "Repo Created"
 
 ####
 
+####
 
+# Create a client installer pkg pointing to this repo
+
+####
+
+if 
+	[[ ! -f /usr/bin/pkgbuild ]]; then
+	${LOGGER} "Pkgbuild is not installed."
+	echo "Please install Xcode command line tools first."
+fi
+
+mkdir -p /tmp/ClientInstaller/Library/Preferences/
+
+HOSTNAME=`/bin/hostname`
+/usr/bin/defaults write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist SoftwareRepoURL "http://$HOSTNAME/munki_repo"
+
+/usr/bin/pkgbuild --identifier com.munkibox.client.pkg --root /tmp/ClientInstaller ClientInstaller.pkg
+
+${LOGGER} "Client install pkg created."
 	
 ####
 
