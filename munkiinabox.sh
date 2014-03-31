@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge
 
-# Version: 0.1.3
+# Version: 0.2
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 # Approach this script like a swarm of bees: Unless you know what you are doing, keep your distance.
@@ -12,7 +12,7 @@
 
 # This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge and numerous others who have helped me assemble this script.
 
-# Pre-Reqs for this script: 10.8/Server 2 or 10.9/Server 3, Munki Tools installed. 
+# Pre-Reqs for this script: 10.8/Server 2 or 10.9/Server 3.  Web Services should be turned on.
 
 # Establish our Basic Variables:
 
@@ -20,10 +20,12 @@ REPOLOC="/Users/Shared/"
 REPODIR="/Users/Shared/munki_repo"
 LOGGER="/usr/bin/logger"
 MUNKILOC="/usr/local/munki"
+WEBROOT="/Library/Server/Web/Data/Sites/Default"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
-webrunning=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
+webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
+AUTOPKGRUN="autopkg run -v AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
 
-echo $webrunning
+echo $webstatus
 
 ####
 
@@ -32,7 +34,7 @@ echo $webrunning
 ####
 
 if 
-	[[ $osvers -ge 8 ]]; then sudo ln -s /Users/Shared/munki_repo /Library/Server/Web/Data/Sites/Default
+	[[ $osvers -ge 8 ]]; then sudo ln -s ${REPODIR} ${WEBROOT}
 	else
 		${LOGGER} "Could not run because the version of the OS does not meet requirements"
 		echo "Sorry, this is for Mac OS 10.8 or later."
@@ -41,7 +43,7 @@ if
 fi
 
 if
-	[[ $webrunning == *STOPPED* ]]; then 
+	[[ $webstatus == *STOPPED* ]]; then 
 	${LOGGER} "Could not run because the Web Service is stopped"
 	echo "Please turn on Web Services in Server.app"
 	exit 0 # Sorry, turn on the webserver.	
@@ -50,9 +52,16 @@ fi
 if
 
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
-	${LOGGER} "Could not run because Munki Tools are not installed"
-	echo "Sorry, Munki Tools are not installed."
-	exit 0 # If munki import doesn't exist, this won't work. 
+	${LOGGER} "Installing Munki Tools Because They Aren't Present"
+	curl -L https://munki.googlecode.com/files/munkitools-1.0.0.1864.0.dmg -o munkitools.dmg
+	hdiutil attach munkitools.dmg 
+	cd /Volumes/munkitools-1.0.0.1864.0/munkitools-1.0.0.1864.0.mpkg/Contents/Packages/
+	installer -pkg munkitools_admin-1.0.0.1864.0.pkg -target /
+	installer -pkg munkitools_core-1.0.0.1864.0.pkg -target /
+	hdituil detach /Volumes/munkitools-1.0.0.1864.0/
+	
+	${LOGGER} "Installed Munki Admin and Munki Core packages"
+	 
 fi	
 
 # Create the repo.
@@ -68,6 +77,14 @@ chmod -R a+rX munki_repo
 
 
 ${LOGGER} "Repo Created"
+
+####
+
+# Get Munki Parts
+
+####
+
+
 	
 ####
 
@@ -75,9 +92,11 @@ ${LOGGER} "Repo Created"
 
 ####
 
-curl -L https://github.com/autopkg/autopkg/releases/download/v0.2.9/autopkg-0.2.9.pkg -o autopkg.pkg
+# Hat Tip to Allister Banks!
 
-installer -pkg autopkg.pkg -target /
+VERS=`curl https://github.com/autopkg/autopkg/releases/latest | cut -c 85-89` ; curl -L https://github.com/autopkg/autopkg/releases/download/v$VERS/autopkg-$VERS.pkg -o autopkg-latest1.pkg
+
+installer -pkg autopkg-latest1.pkg -target /
 
 ${LOGGER} "AutoPKG Installed"
 
@@ -103,9 +122,54 @@ ${LOGGER} "AutoPKG Configured"
 
 ####
 
-autopkg run -v AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki
+${AUTOPKGRUN}
 
 ${LOGGER} "AutoPKG Run"
+
+####
+
+# Create new site_default manifest and add imported packages to it
+
+####
+
+manifestutil new-manifest site_default
+
+manifestutil add-catalog testing --manifest site_default
+
+listofpkgs=(`manifestutil list-catalog-items testing`)
+
+# Thanks Rich! Code for Array Processing borrowed from First Boot Packager
+# Original at https://github.com/rtrouton/rtrouton_scripts/tree/master/rtrouton_scripts/first_boot_package_install/scripts
+
+tLen=${#listofpkgs[@]} 
+
+for (( i=0; i<${tLen}; i++));
+do 
+	${LOGGER} "Adding "${listofpkgs[$i]}" to site_default"
+	manifestutil add-pkg ${listofpkgs[$i]} --manifest site_default
+	${LOGGER} "Added "${listofpkgs[$i]}" to site_default"
+done
+
+####
+
+# Install AutoPKG Automation [[ COMING SOON ]]
+
+####
+
+# curl -L https://github.com/seankaiser/automation-scripts/blob/master/autopkg/autopkg-wrapper.sh -o /usr/local/bin/autopkg-wrapper.sh
+
+
+
+####
+
+#  Install MunkiReport-PHP [[ COMING SOON ]]
+
+####
+
+# cd ${WEBROOT}
+# git clone https://github.com/munkireport/munkireport-php.git
+# cd munkireport-php
+
 
 ####
 
@@ -113,7 +177,8 @@ ${LOGGER} "AutoPKG Run"
 
 ####
 
-rm $REPOLOC/autopkg.pkg
+rm $REPOLOC/autopkg-latest1.pkg
+rm $REPOLOC/munkitools.dmg
 
 ${LOGGER} "I put my toys away!"
 

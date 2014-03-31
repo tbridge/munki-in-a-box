@@ -12,7 +12,6 @@ Pre-Requisites:
 
 1) 10.8/Server 2 or 10.9/Server 3  
 2) Web Services Enabled
-3) Munki Tools installed
 
 Directions for Use:
 
@@ -21,10 +20,24 @@ Directions for Use:
 3) Alter Line 106 to reflect your choice of AutoPKG installs  
 4) sudo ./munkiinabox.sh
 
-Future Features:
+NEW in 0.2:
 
-1) Replace hard-coded AutoPKG download with current release version retrieval links  
+• AutoPKG is now downloaded from the latest trunk.
+• The site_default Manifest is established from the packages passed to autopkg.
+• If Munki is not installed, the script grabs the munki tools, mounts the dmg and installs munki_core and munki_admin packages from inside. 
+
+Immediate Future Plans:
+
+√ 1) Replace hard-coded AutoPKG download with current release version retrieval links  
 2) Allow check of plain apachectl for purposes of using on a non-Server.app platform.  
 3) Install Sean Kaiser's Monitoring Scripts with configuration variables passed through
+
+Other Good Suggestions:
+
+√ 1) Creation of site_default Manifest
+2) Generation of Client Configuration pkg or script
+3) Install of Munki-Report PHP
+√ 4) Replace Munkitools requirement with install of appropriate munki elements.
+
 
 Questions? Comments? Suggestions? Jeers? Please email me at tom@technolutionary.com
