@@ -25,7 +25,7 @@ GIT="/usr/bin/git"
 MANU="/usr/local/munki/manifestutil"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="autopkg run -v AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
+AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
 MAINPREFSDIR="/Library/Preferences"
 
 echo $webstatus
@@ -172,15 +172,17 @@ echo "AutoPKG Installed!"
 ####
 
 cd $MAINPREFSDIR
-defaults write com.github.autopkg MUNKI_REPO $REPODIR
+/usr/bin/defaults write com.github.autopkg MUNKI_REPO $REPODIR
 
 
 autopkg repo-add http://github.com/autopkg/recipes.git
 
 
-/usr/bin/defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist editor TextWrangler.app
-/usr/bin/defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist repo_path $REPODIR
-/usr/bin/defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist pkginfo_extension .plist
+/usr/bin/defaults write com.googlecode.munki.munkiimport.plist editor TextWrangler.app
+/usr/bin/defaults write com.googlecode.munki.munkiimport.plist repo_path $REPODIR
+/usr/bin/defaults write com.googlecode.munki.munkiimport.plist pkginfo_extension .plist
+
+plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
 
 ${LOGGER} "AutoPKG Configured"
 echo "AutoPKG Configured"
@@ -208,7 +210,7 @@ ${MANU} add-catalog testing --manifest site_default
 echo "Testing Catalog added to Site_Default"
 
 listofpkgs=(`${MANU} list-catalog-items testing`)
-echo "List of Packages for adding to repo:" #listofpkgs
+echo "List of Packages for adding to repo:" ${#listofpkgs}
 
 # Thanks Rich! Code for Array Processing borrowed from First Boot Packager
 # Original at https://github.com/rtrouton/rtrouton_scripts/tree/master/rtrouton_scripts/first_boot_package_install/scripts
