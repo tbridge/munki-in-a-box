@@ -178,9 +178,9 @@ defaults write com.github.autopkg MUNKI_REPO $REPODIR
 autopkg repo-add http://github.com/autopkg/recipes.git
 
 
-defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist editor TextWrangler.app
-defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist repo_path $REPODIR
-defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist pkginfo_extension .plist
+/usr/bin/defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist editor TextWrangler.app
+/usr/bin/defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist repo_path $REPODIR
+/usr/bin/defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist pkginfo_extension .plist
 
 ${LOGGER} "AutoPKG Configured"
 echo "AutoPKG Configured"
