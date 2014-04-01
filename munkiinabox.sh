@@ -21,9 +21,12 @@ REPODIR="/Users/Shared/munki_repo"
 LOGGER="/usr/bin/logger"
 MUNKILOC="/usr/local/munki"
 WEBROOT="/Library/Server/Web/Data/Sites/Default"
+GIT="/usr/bin/git"
+MANU="/usr/local/munki/manifestutil"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="autopkg run -v AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
+MAINPREFSDIR="/Library/Preferences"
 
 echo $webstatus
 
@@ -53,16 +56,61 @@ if
 
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
 	${LOGGER} "Installing Munki Tools Because They Aren't Present"
-	curl -L https://munki.googlecode.com/files/munkitools-1.0.0.1864.0.dmg -o munkitools.dmg
-	hdiutil attach munkitools.dmg 
+	curl -L https://munki.googlecode.com/files/munkitools-1.0.0.1864.0.dmg -o $REPOLOC/munkitools.dmg
+	hdiutil attach $REPOLOC/munkitools.dmg 
 	cd /Volumes/munkitools-1.0.0.1864.0/munkitools-1.0.0.1864.0.mpkg/Contents/Packages/
 	installer -pkg munkitools_admin-1.0.0.1864.0.pkg -target /
+	echo "Installed Munki Admin"
 	installer -pkg munkitools_core-1.0.0.1864.0.pkg -target /
-	hdituil detach /Volumes/munkitools-1.0.0.1864.0/
+	echo "Installed Munki Core"
+	hdiutil detach /Volumes/munkitools-1.0.0.1864.0/ -force
 	
 	${LOGGER} "Installed Munki Admin and Munki Core packages"
+	echo "Installed Munki packages"
 	 
 fi	
+
+# Check created here by Tim Sutton, for which I owe him a beer. Or six.
+
+if 
+
+	[[ ! -d /Applications/Xcode.app ]]; then
+	echo "You need to install the Xcode command line tools. Let me get that for you."
+# Get and install Xcode CLI tools
+OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
+ 
+# on 10.9, we can leverage SUS to get the latest CLI tools
+	if [ "$OSX_VERS" -ge 9 ]; then
+
+    # create the placeholder file that's checked by CLI updates' .dist code 
+    # in Apple's SUS catalog
+    	touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+
+    # find the update with "Developer" in the name
+    	PROD=$(softwareupdate -l | grep -B 1 "Developer" | head -n 1 | awk -F"*" '{print $2}')
+
+    # install it
+    # amazingly, it won't find the update if we put the update ID in double-quotes
+    	softwareupdate -i $PROD -v
+ 
+# on 10.7/10.8, we instead download from public download URLs, which can be found in
+# the dvtdownloadableindex:
+# https://devimages.apple.com.edgekey.net/downloads/xcode/simulators/index-3905972D-B609-49CE-8D06-51ADC78E07BC.dvtdownloadableindex
+		else
+    	[ "$OSX_VERS" -eq 7 ] && DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg
+    	[ "$OSX_VERS" -eq 8 ] && DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_march_2014.dmg
+
+    		TOOLS=clitools.dmg
+    		curl "$DMGURL" -o "$TOOLS"
+    		TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
+    		hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT"
+    		installer -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
+    		hdiutil detach "$TMPMOUNT"
+    		rm -rf "$TMPMOUNT"
+    		rm "$TOOLS"
+	fi
+	
+fi
 
 # Create the repo.
 
@@ -77,12 +125,8 @@ chmod -R a+rX munki_repo
 
 
 ${LOGGER} "Repo Created"
+echo "Repo Created"
 
-####
-
-# Get Munki Parts
-
-####
 
 ####
 
@@ -94,6 +138,7 @@ if
 	[[ ! -f /usr/bin/pkgbuild ]]; then
 	${LOGGER} "Pkgbuild is not installed."
 	echo "Please install Xcode command line tools first."
+	exit 0 # Gotta install the command line tools.
 fi
 
 mkdir -p /tmp/ClientInstaller/Library/Preferences/
@@ -118,6 +163,7 @@ VERS=`curl https://github.com/autopkg/autopkg/releases/latest | cut -c 85-89` ; 
 installer -pkg autopkg-latest1.pkg -target /
 
 ${LOGGER} "AutoPKG Installed"
+echo "AutoPKG Installed!"
 
 ####
 
@@ -125,15 +171,19 @@ ${LOGGER} "AutoPKG Installed"
 
 ####
 
+cd $MAINPREFSDIR
 defaults write com.github.autopkg MUNKI_REPO $REPODIR
+
 
 autopkg repo-add http://github.com/autopkg/recipes.git
 
-defaults write com.googlecode.munki.munkiimport editor TextWrangler.app
-defaults write com.googlecode.munki.munkiimport repo_path $REPODIR
-defaults write com.googlecode.munki.munkiimport pkginfo_extension .plist
+
+defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist editor TextWrangler.app
+defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist repo_path $REPODIR
+defaults write /Library/Preferences/com.googlecode.munki.munkiimport.plist pkginfo_extension .plist
 
 ${LOGGER} "AutoPKG Configured"
+echo "AutoPKG Configured"
 
 ####
 
@@ -144,6 +194,7 @@ ${LOGGER} "AutoPKG Configured"
 ${AUTOPKGRUN}
 
 ${LOGGER} "AutoPKG Run"
+echo "AutoPKG has run"
 
 ####
 
@@ -151,21 +202,24 @@ ${LOGGER} "AutoPKG Run"
 
 ####
 
-manifestutil new-manifest site_default
+${MANU} new-manifest site_default
+echo "Site_Default created"
+${MANU} add-catalog testing --manifest site_default
+echo "Testing Catalog added to Site_Default"
 
-manifestutil add-catalog testing --manifest site_default
-
-listofpkgs=(`manifestutil list-catalog-items testing`)
+listofpkgs=(`${MANU} list-catalog-items testing`)
+echo "List of Packages for adding to repo:" #listofpkgs
 
 # Thanks Rich! Code for Array Processing borrowed from First Boot Packager
 # Original at https://github.com/rtrouton/rtrouton_scripts/tree/master/rtrouton_scripts/first_boot_package_install/scripts
 
 tLen=${#listofpkgs[@]} 
+echo $tLen " packages to install"
 
 for (( i=0; i<${tLen}; i++));
 do 
 	${LOGGER} "Adding "${listofpkgs[$i]}" to site_default"
-	manifestutil add-pkg ${listofpkgs[$i]} --manifest site_default
+	${MANU} add-pkg ${listofpkgs[$i]} --manifest site_default
 	${LOGGER} "Added "${listofpkgs[$i]}" to site_default"
 done
 
