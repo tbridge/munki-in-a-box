@@ -25,6 +25,7 @@ NEW in 0.2:
 • AutoPKG is now downloaded from the latest trunk.  
 • The site_default Manifest is established from the packages passed to autopkg.  
 • If Munki is not installed, the script grabs the munki tools, mounts the dmg and installs munki_core and munki_admin packages from inside. 
+• Munki Report is now installed. It still needs to have an admin account created, but it's added and configured. If your site does not load correctly, be sure PHP is active in Server.app
 
 Immediate Future Plans:
 
@@ -36,7 +37,7 @@ Other Good Suggestions:
 
 √ 1) Creation of site_default Manifest  
 √ 2) Generation of Client Configuration pkg or script - Thanks Nick McSpadden!  
-3) Install of Munki-Report PHP  
+√ 3) Install of Munki-Report PHP  - Thanks nbalonso, A.E. von Bochoven and Marnin Goldberg
 √ 4) Replace Munkitools requirement with install of appropriate munki elements.
 
 
