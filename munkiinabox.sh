@@ -252,8 +252,10 @@ git clone https://github.com/munkireport/munkireport-php.git
 cp munkireport-php/config_default.php munkireport-php/config.php
 chmod +a "_www allow add_file,delete_child" munkireport-php/app/db
 echo "short_open_tag = On" >> ${PHPROOT}/php.ini
+echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkireport-php/config.php 
 
-${LOGGER} "Munkireport-php has been installed. Please visit the site to setup your admin account. Once it's setup, you must append the given line to "${WEBROOT}"munkireport-php/config.php in order for it to work."
+# This creates a user "root" with password "root"
+
 
 ####
 
