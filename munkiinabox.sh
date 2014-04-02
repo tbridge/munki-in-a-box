@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge
 
-# Version: 0.2
+# Version: 0.2.1
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 # Approach this script like a swarm of bees: Unless you know what you are doing, keep your distance.
@@ -17,10 +17,12 @@
 # Establish our Basic Variables:
 
 REPOLOC="/Users/Shared/"
-REPODIR=${REPOLOC}"/munki_repo"
-LOGGER="/usr/bin/logger"
+REPONAME="munki_repo"
+REPODIR=${REPOLOC}${REPONAME}
+LOGGER="/usr/bin/logger -t Munki-in-a-Box"
 MUNKILOC="/usr/local/munki"
 WEBROOT="/Library/Server/Web/Data/Sites/Default"
+PHPROOT="/Library/Server/Web/Config/php"
 GIT="/usr/bin/git"
 MANU="/usr/local/munki/manifestutil"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
@@ -245,10 +247,13 @@ done
 
 ####
 
-# cd ${WEBROOT}
-# git clone https://github.com/munkireport/munkireport-php.git
-# cd munkireport-php
+cd ${WEBROOT}
+git clone https://github.com/munkireport/munkireport-php.git
+cp munkireport-php/config_default.php munkireport-php/config.php
+chmod +a "_www allow add_file,delete_child" munkireport-php/app/db
+echo "short_open_tag = On" >> ${PHPROOT}/php.ini
 
+${LOGGER} "Munkireport-php has been installed. Please visit the site to setup your admin account. Once it's setup, you must append the given line to "${WEBROOT}"munkireport-php/config.php in order for it to work."
 
 ####
 
