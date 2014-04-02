@@ -17,7 +17,7 @@
 # Establish our Basic Variables:
 
 REPOLOC="/Users/Shared/"
-REPODIR="/Users/Shared/munki_repo"
+REPODIR=${REPOLOC}"/munki_repo"
 LOGGER="/usr/bin/logger"
 MUNKILOC="/usr/local/munki"
 WEBROOT="/Library/Server/Web/Data/Sites/Default"
@@ -26,6 +26,7 @@ MANU="/usr/local/munki/manifestutil"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
+DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 
 echo $webstatus
@@ -144,7 +145,7 @@ fi
 mkdir -p /tmp/ClientInstaller/Library/Preferences/
 
 HOSTNAME=`/bin/hostname`
-/usr/bin/defaults write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist SoftwareRepoURL "http://$HOSTNAME/munki_repo"
+${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist SoftwareRepoURL "http://$HOSTNAME/munki_repo"
 
 /usr/bin/pkgbuild --identifier com.munkibox.client.pkg --root /tmp/ClientInstaller ClientInstaller.pkg
 
@@ -171,18 +172,21 @@ echo "AutoPKG Installed!"
 
 ####
 
-cd $MAINPREFSDIR
-/usr/bin/defaults write com.github.autopkg MUNKI_REPO $REPODIR
+
+${DEFAULTS} write com.github.autopkg MUNKI_REPO $REPODIR
 
 
 autopkg repo-add http://github.com/autopkg/recipes.git
 
+${DEFAULTS} write com.googlecode.munki.munkiimport editor TextWrangler.app
+${DEFAULTS} write com.googlecode.munki.munkiimport repo_path $REPODIR
+${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
+${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
 
-/usr/bin/defaults write com.googlecode.munki.munkiimport.plist editor TextWrangler.app
-/usr/bin/defaults write com.googlecode.munki.munkiimport.plist repo_path $REPODIR
-/usr/bin/defaults write com.googlecode.munki.munkiimport.plist pkginfo_extension .plist
-
-plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
+plutil -convert xml1 /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist 
+cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
+chown :staff ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
+chmod 660 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
 
 ${LOGGER} "AutoPKG Configured"
 echo "AutoPKG Configured"
