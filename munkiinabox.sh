@@ -243,7 +243,7 @@ done
 
 ####
 
-#  Install MunkiReport-PHP [[ COMING SOON ]]
+#  Install MunkiReport-PHP
 
 ####
 
