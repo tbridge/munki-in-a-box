@@ -43,24 +43,28 @@
 
 <p>This script is based upon the <a href="https://code.google.com/p/munki/wiki/DemonstrationSetup">Demonstration Setup Guide for Munki</a>, <a href="https://github.com/autopkg/autopkg/wiki/Getting-Started">Getting Started with AutoPKG</a>, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge and numerous others who have helped me assemble this script.</p>
 
-<p>Pre-Requisites:</p>
+<p><strong>Pre-Requisites:</strong></p>
 
 <p>1) 10.8/Server 2 or 10.9/Server 3<br>
-2) Web Services Enabled<br>
+2) Web Services Enabled, PHP activated<br>
 3) Munki Tools Installed</p>
 
-<p>Directions for Use:</p>
+<p><strong>Installed Packages</strong></p>
+
+<p>1) AutoPKG<br>
+2) munkireport-php</p>
+
+<p><strong>Directions for Use:</strong></p>
 
 <p>1) Download Script<br>
 2) Alter Lines 19-20 to reflect your choice for munki repo name and location<br>
-3) Alter Line 106 to reflect your choice of AutoPKG installs<br>
+3) Alter Line 30 to reflect your choice of AutoPKG installs<br>
 4) sudo ./munkiinabox.sh</p>
 
 <p>Future Features:</p>
 
-<p>1) Replace hard-coded AutoPKG download with current release version retrieval links<br>
-2) Allow check of plain apachectl for purposes of using on a non-Server.app platform.  <br>
-3) Install Sean Kaiser's Monitoring Scripts with configuration variables passed through<br></p>
+1) Allow check of plain apachectl for purposes of using on a non-Server.app platform.  <br>
+2) Install Sean Kaiser's Monitoring Scripts with configuration variables passed through<br></p>
 
 
 <p>Questions? Comments? Suggestions? Jeers? Please email me at <a href="mailto:tom@technolutionary.com">tom@technolutionary.com</a></p>
