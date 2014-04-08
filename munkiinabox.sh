@@ -118,13 +118,13 @@ fi
 # Create the repo.
 
 cd $REPOLOC
-mkdir munki_repo
-mkdir munki_repo/catalogs
-mkdir munki_repo/manifests
-mkdir munki_repo/pkgs
-mkdir munki_repo/pkgsinfo
+mkdir ${REPONAME}
+mkdir ${REPONAME}/catalogs
+mkdir ${REPONAME}/manifests
+mkdir ${REPONAME}/pkgs
+mkdir ${REPONAME}/pkgsinfo
 
-chmod -R a+rX munki_repo
+chmod -R a+rX ${REPONAME}
 
 
 ${LOGGER} "Repo Created"
@@ -147,7 +147,7 @@ fi
 mkdir -p /tmp/ClientInstaller/Library/Preferences/
 
 HOSTNAME=`/bin/hostname`
-${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist SoftwareRepoURL "http://$HOSTNAME/munki_repo"
+${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist SoftwareRepoURL "http://$HOSTNAME/${REPONAME}"
 
 /usr/bin/pkgbuild --identifier com.munkibox.client.pkg --root /tmp/ClientInstaller ClientInstaller.pkg
 
