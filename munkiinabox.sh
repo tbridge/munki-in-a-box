@@ -25,6 +25,7 @@ WEBROOT="/Library/Server/Web/Data/Sites/Default"
 PHPROOT="/Library/Server/Web/Config/php"
 GIT="/usr/bin/git"
 MANU="/usr/local/munki/manifestutil"
+TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
@@ -180,7 +181,7 @@ ${DEFAULTS} write com.github.autopkg MUNKI_REPO $REPODIR
 
 autopkg repo-add http://github.com/autopkg/recipes.git
 
-${DEFAULTS} write com.googlecode.munki.munkiimport editor TextWrangler.app
+${DEFAULTS} write com.googlecode.munki.munkiimport editor ${TEXTEDITOR}
 ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path $REPODIR
 ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
 ${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
