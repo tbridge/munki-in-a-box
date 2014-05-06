@@ -28,7 +28,8 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
+# AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
+AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki Firefox.munki MakeCatalogs.munki TextWrangler.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 
@@ -177,11 +178,13 @@ echo "AutoPKG Installed!"
 
 
 ${DEFAULTS} write com.github.autopkg MUNKI_REPO $REPODIR
-
+cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences/com.github.autopkg.plist
+chown :staff ~/Library/Preferences/com.github.autopkg.plist
+chmod 660 ~/Library/Preferences/com.github.autopkg.plist
 
 autopkg repo-add http://github.com/autopkg/recipes.git
 
-${DEFAULTS} write com.googlecode.munki.munkiimport editor ${TEXTEDITOR}
+${DEFAULTS} write com.googlecode.munki.munkiimport editor $TEXTEDITOR
 ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path $REPODIR
 ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
 ${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
