@@ -1,16 +1,17 @@
 #!/bin/bash
 
 # Munki In A Box
-# By Tom Bridge
+# By Tom Bridge, Technolutionary LLC
 
-# Version: 0.2.1
+# Version: 0.3.0
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
+
 # Approach this script like a swarm of bees: Unless you know what you are doing, keep your distance.
 
 # The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. I have placed defaults in these variables, but they are easily overridden and you should decide where they go.
 
-# This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge and numerous others who have helped me assemble this script.
+# This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser and numerous others who have helped me assemble this script.
 
 # Pre-Reqs for this script: 10.8/Server 2 or 10.9/Server 3.  Web Services should be turned on.
 
@@ -28,8 +29,7 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-# AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
-AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki Firefox.munki MakeCatalogs.munki TextWrangler.munki"
+AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 
@@ -62,7 +62,7 @@ if
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
 	${LOGGER} "Installing Munki Tools Because They Aren't Present"
 	curl -L https://munki.googlecode.com/files/munkitools-1.0.0.1864.0.dmg -o $REPOLOC/munkitools.dmg
-	hdiutil attach $REPOLOC/munkitools.dmg 
+	hdiutil attach $REPOLOC/munkitools.dmg -nobrowse
 	cd /Volumes/munkitools-1.0.0.1864.0/munkitools-1.0.0.1864.0.mpkg/Contents/Packages/
 	installer -pkg munkitools_admin-1.0.0.1864.0.pkg -target /
 	echo "Installed Munki Admin"
@@ -108,7 +108,7 @@ OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
     		TOOLS=clitools.dmg
     		curl "$DMGURL" -o "$TOOLS"
     		TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
-    		hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT"
+    		hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
     		installer -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
     		hdiutil detach "$TMPMOUNT"
     		rm -rf "$TMPMOUNT"
@@ -127,7 +127,7 @@ mkdir ${REPONAME}/pkgs
 mkdir ${REPONAME}/pkgsinfo
 
 chmod -R a+rX ${REPONAME}
-
+chown -R :admin ${REPONAME}
 
 ${LOGGER} "Repo Created"
 echo "Repo Created"
@@ -178,9 +178,6 @@ echo "AutoPKG Installed!"
 
 
 ${DEFAULTS} write com.github.autopkg MUNKI_REPO $REPODIR
-cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences/com.github.autopkg.plist
-chown :staff ~/Library/Preferences/com.github.autopkg.plist
-chmod 660 ~/Library/Preferences/com.github.autopkg.plist
 
 autopkg repo-add http://github.com/autopkg/recipes.git
 
@@ -189,10 +186,6 @@ ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path $REPODIR
 ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
 ${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
 
-plutil -convert xml1 /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist 
-cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
-chown :staff ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
-chmod 660 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
 
 ${LOGGER} "AutoPKG Configured"
 echo "AutoPKG Configured"
@@ -243,7 +236,17 @@ done
 
 # curl -L https://github.com/seankaiser/automation-scripts/blob/master/autopkg/autopkg-wrapper.sh -o /usr/local/bin/autopkg-wrapper.sh
 
+####
 
+# Install Munki Admin App by the amazing Hannes Juutilainen
+
+####
+
+curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v0.3.0/MunkiAdmin-0.3.0.dmg -o $REPOLOC/munkiadmin.dmg
+hdiutil attach $REPOLOC/munkiadmin.dmg -nobrowse
+cd /Volumes/MunkiAdmin-0.3.0/
+cp -R /Volumes/MunkiAdmin-0.3.0/MunkiAdmin.app /Applications/Utilities
+hdiutil detach /Volumes/MunkiAdmin-0.3.0 -force
 
 ####
 
@@ -269,6 +272,7 @@ echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkir
 
 rm $REPOLOC/autopkg-latest1.pkg
 rm $REPOLOC/munkitools.dmg
+rm $REPOLOC/munkiadmin.dmg
 
 ${LOGGER} "I put my toys away!"
 
