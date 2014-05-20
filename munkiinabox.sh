@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.3.0
+# Version: 0.3.1
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -32,6 +32,9 @@ webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
+ADMINUSERNAME="ladmin"
+
+echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests!"
 
 echo $webstatus
 
@@ -80,7 +83,7 @@ fi
 if 
 
 	[[ ! -d /Applications/Xcode.app ]]; then
-	echo "You need to install the Xcode command line tools. Let me get that for you."
+	echo "You need to install the Xcode command line tools. Let me get that for you, it'll just take a minute."
 # Get and install Xcode CLI tools
 OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
  
@@ -116,6 +119,8 @@ OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
 	fi
 	
 fi
+
+echo "Great! All Tests are passed, so let's create the Munki Repo!"
 
 # Create the repo.
 
@@ -154,6 +159,7 @@ ${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist
 /usr/bin/pkgbuild --identifier com.munkibox.client.pkg --root /tmp/ClientInstaller ClientInstaller.pkg
 
 ${LOGGER} "Client install pkg created."
+echo "Client install pkg is created. It's in the base of the repo."
 	
 ####
 
@@ -186,9 +192,15 @@ ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path $REPODIR
 ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
 ${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
 
-
 ${LOGGER} "AutoPKG Configured"
 echo "AutoPKG Configured"
+
+# This makes AutoPKG useful on future runs for the admin user defined at the top. It copies & creates preferences for autopkg and munki into their home dir's Library folder, as well as transfers ownership for the ~/Library/AutoPkg folders to them.
+
+cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Library/Preferences
+cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences
+chmod 660 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
+chmod 660 ~/Library/Preferences/com.github.autopkg.plist
 
 ####
 
@@ -200,6 +212,10 @@ ${AUTOPKGRUN}
 
 ${LOGGER} "AutoPKG Run"
 echo "AutoPKG has run"
+
+# Bring it on home to the all powerful, all wise, local admin...
+
+chown -R ${ADMINUSERNAME} ~/Library/AutoPkg
 
 ####
 
@@ -213,7 +229,7 @@ ${MANU} add-catalog testing --manifest site_default
 echo "Testing Catalog added to Site_Default"
 
 listofpkgs=(`${MANU} list-catalog-items testing`)
-echo "List of Packages for adding to repo:" ${#listofpkgs}
+echo "List of Packages for adding to repo:" ${listofpkgs[*]}
 
 # Thanks Rich! Code for Array Processing borrowed from First Boot Packager
 # Original at https://github.com/rtrouton/rtrouton_scripts/tree/master/rtrouton_scripts/first_boot_package_install/scripts
@@ -276,5 +292,6 @@ rm $REPOLOC/munkiadmin.dmg
 
 ${LOGGER} "I put my toys away!"
 
+echo "Thank you for flying Munki in a Box Air! You now have a working repo, go forth and install your clients!"
 
 exit
