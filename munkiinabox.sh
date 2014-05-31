@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.3.1
+# Version: 0.3.2
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -29,7 +29,7 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="autopkg run AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
+AUTOPKGRUN="autopkg run -v AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
@@ -187,8 +187,8 @@ ${DEFAULTS} write com.github.autopkg MUNKI_REPO $REPODIR
 
 autopkg repo-add http://github.com/autopkg/recipes.git
 
-${DEFAULTS} write com.googlecode.munki.munkiimport editor $TEXTEDITOR
-${DEFAULTS} write com.googlecode.munki.munkiimport repo_path $REPODIR
+${DEFAULTS} write com.googlecode.munki.munkiimport editor ${TEXTEDITOR}
+${DEFAULTS} write com.googlecode.munki.munkiimport repo_path ${REPODIR}
 ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
 ${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
 
@@ -201,6 +201,8 @@ cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Librar
 cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences
 chmod 660 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
 chmod 660 ~/Library/Preferences/com.github.autopkg.plist
+
+plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
 
 ####
 
