@@ -215,7 +215,7 @@ ${AUTOPKGRUN}
 ${LOGGER} "AutoPKG Run"
 echo "AutoPKG has run"
 
-# Bring it on home to the all powerful, all wise, local admin...
+# Bring it on home to the all-powerful, all-wise, local admin... (Thanks Luis)
 
 chown -R ${ADMINUSERNAME} ~/Library/AutoPkg
 
