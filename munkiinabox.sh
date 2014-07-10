@@ -64,7 +64,7 @@ if
 
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
 	${LOGGER} "Installing Munki Tools Because They Aren't Present"
-	curl -L https://munki.googlecode.com/files/munkitools-1.0.0.1864.0.dmg -o $REPOLOC/munkitools.dmg
+	curl -L https://munkibuilds.org/munkitools-latest.dmg -o $REPOLOC/munkitools.dmg
 	hdiutil attach $REPOLOC/munkitools.dmg -nobrowse
 	cd /Volumes/munkitools-1.0.0.1864.0/munkitools-1.0.0.1864.0.mpkg/Contents/Packages/
 	installer -pkg munkitools_admin-1.0.0.1864.0.pkg -target /
