@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.3.2
+# Version: 0.4.0
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -11,7 +11,7 @@
 
 # The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. I have placed defaults in these variables, but they are easily overridden and you should decide where they go.
 
-# This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser and numerous others who have helped me assemble this script.
+# This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski and numerous others who have helped me assemble this script.
 
 # Pre-Reqs for this script: 10.8/Server 2 or 10.9/Server 3.  Web Services should be turned on.
 
@@ -29,10 +29,13 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="autopkg run -v AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
+AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
+SCRIPTDIR="/usr/local/bin"
+AUTOPKGEMAIL="youraddress@domain.com"
+AUTOPKGORGNAME="com.technolutionary"
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests!"
 
@@ -66,12 +69,12 @@ if
 	${LOGGER} "Installing Munki Tools Because They Aren't Present"
 	curl -L https://munkibuilds.org/munkitools-latest.dmg -o $REPOLOC/munkitools.dmg
 	hdiutil attach $REPOLOC/munkitools.dmg -nobrowse
-	cd /Volumes/munkitools-1.0.0.1864.0/munkitools-1.0.0.1864.0.mpkg/Contents/Packages/
-	installer -pkg munkitools_admin-1.0.0.1864.0.pkg -target /
+	cd /Volumes/munkitools-1.0.0.1885.0/munkitools-1.0.0.1885.0.mpkg/Contents/Packages/
+	installer -pkg munkitools_admin-1.0.0.1885.0.pkg -target /
 	echo "Installed Munki Admin"
-	installer -pkg munkitools_core-1.0.0.1864.0.pkg -target /
+	installer -pkg munkitools_core-1.0.0.1885.0.pkg -target /
 	echo "Installed Munki Core"
-	hdiutil detach /Volumes/munkitools-1.0.0.1864.0/ -force
+	hdiutil detach /Volumes/munkitools-1.0.0.1885.0/ -force
 	
 	${LOGGER} "Installed Munki Admin and Munki Core packages"
 	echo "Installed Munki packages"
@@ -210,7 +213,7 @@ plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plis
 
 ####
 
-${AUTOPKGRUN}
+autopkg run -v ${AUTOPKGRUN}
 
 ${LOGGER} "AutoPKG Run"
 echo "AutoPKG has run"
@@ -248,11 +251,22 @@ done
 
 ####
 
-# Install AutoPKG Automation [[ COMING SOON ]]
+# Install AutoPKG Automation Scripts by the amazing Sean Kaiser [[ NOW IN BETA ]]
 
 ####
 
-# curl -L https://github.com/seankaiser/automation-scripts/blob/master/autopkg/autopkg-wrapper.sh -o /usr/local/bin/autopkg-wrapper.sh
+cd ${REPOLOC}
+git clone https://github.com/seankaiser/automation-scripts.git
+mv automation-scripts/autopkg/autopkg-wrapper.sh ${SCRIPTDIR}
+mv automation-scripts/autopkg/com.example.autopkg-wrapper.plist /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
+
+cd ${SCRIPTDIR}
+
+sed -i.orig "s|AdobeFlashPlayer.munki|${AUTOPKGRUN}|" autopkg-wrapper.sh
+sed -i.orig2 "s|you@yourdomain.net|${AUTOPKGEMAIL}|" autopkg-wrapper.sh
+sed -i.orig3 "s|user=[\"]autopkg[\"]|user=\"${ADMINUSERNAME}\"|" autopkg-wrapper.sh
+
+launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
 ####
 
@@ -265,6 +279,19 @@ hdiutil attach $REPOLOC/munkiadmin.dmg -nobrowse
 cd /Volumes/MunkiAdmin-0.3.0/
 cp -R /Volumes/MunkiAdmin-0.3.0/MunkiAdmin.app /Applications/Utilities
 hdiutil detach /Volumes/MunkiAdmin-0.3.0 -force
+
+####
+
+# Install Munki Enroll
+
+####
+
+cd ${REPODIR}
+git clone https://github.com/edingc/munki-enroll.git
+mv munki-enroll munki-enroll-host
+mv munki-enroll-host/munki-enroll munki-enroll
+mv munki-enroll-host/Scripts/munki_enroll.sh munki-enroll
+sed -i.orig "s|/munki/|/${HOSTNAME}/|" munki-enroll/munki_enroll.sh
 
 ####
 

@@ -17,8 +17,14 @@ Directions for Use:
 
 1) Download Script  
 2) Alter Lines 20-21 to reflect your choice for munki repo name and location  
-3) Alter Line 32 to reflect your choice of AutoPKG installs  
-4) sudo ./munkiinabox.sh
+3) Alter Line 32 to reflect your choice of AutoPKG installs
+4) Alter Line 35 to reflect your admin username (ladmin is default)
+5) Alter Lines 37-38 to reflect AutoPKG Automation Scripts
+6) sudo ./munkiinabox.sh
+
+NEW in 0.4:
+
+• Inclusion of Munki-Enroll and Sean Kaiser's AutoPKG Automation Scripts
 
 NEW in 0.3: 
 
@@ -32,11 +38,6 @@ Included from in 0.2:
 • The site_default Manifest is established from the packages passed to autopkg.  
 • If Munki is not installed, the script grabs the munki tools, mounts the dmg and installs munki_core and munki_admin packages from inside. 
 • Munki Report is now installed. It still needs to have an admin account created, but it's added and configured. If your site does not load correctly, be sure PHP is active in Server.app
-
-Future Plans (Pull Requests Welcome!):
-
-2) Allow check of plain apachectl for purposes of using on a non-Server.app platform.  
-3) Install Sean Kaiser's Monitoring Scripts with configuration variables passed through
 
 
 Questions? Comments? Suggestions? Jeers? Please email me at tom@technolutionary.com
