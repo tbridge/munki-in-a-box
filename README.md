@@ -25,6 +25,7 @@ Directions for Use:
 NEW in 0.4:
 
 • Inclusion of Munki-Enroll and Sean Kaiser's AutoPKG Automation Scripts
+• Be sure to change the new AutoPKG Automation settings.
 
 NEW in 0.3: 
 
