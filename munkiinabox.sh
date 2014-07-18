@@ -68,16 +68,54 @@ if
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
 	${LOGGER} "Installing Munki Tools Because They Aren't Present"
 	curl -L https://munkibuilds.org/munkitools-latest.dmg -o $REPOLOC/munkitools.dmg
-	hdiutil attach $REPOLOC/munkitools.dmg -nobrowse
-	cd /Volumes/munkitools-1.0.0.1885.0/munkitools-1.0.0.1885.0.mpkg/Contents/Packages/
-	installer -pkg munkitools_admin-1.0.0.1885.0.pkg -target /
-	echo "Installed Munki Admin"
-	installer -pkg munkitools_core-1.0.0.1885.0.pkg -target /
-	echo "Installed Munki Core"
-	hdiutil detach /Volumes/munkitools-1.0.0.1885.0/ -force
+	hdiutil attach $REPOLOC/munkitools.dmg -nobrowse -mountpoint /Volumes/munkitools
 	
+# Write a Choices XML file for the Munki package. Thanks Rich and Greg!
+ 	 
+	 /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
+	 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<array>
+        <dict>
+                <key>attributeSetting</key>
+                <integer>1</integer>
+                <key>choiceAttribute</key>
+                <string>selected</string>
+                <key>choiceIdentifier</key>
+                <string>core</string>
+        </dict>
+        <dict>
+                <key>attributeSetting</key>
+                <integer>1</integer>
+                <key>choiceAttribute</key>
+                <string>selected</string>
+                <key>choiceIdentifier</key>
+                <string>admin</string>
+        </dict>
+        <dict>
+                <key>attributeSetting</key>
+                <integer>0</integer>
+                <key>choiceAttribute</key>
+                <string>selected</string>
+                <key>choiceIdentifier</key>
+                <string>app</string>
+        </dict>
+        <dict>
+                <key>attributeSetting</key>
+                <integer>0</integer>
+                <key>choiceAttribute</key>
+                <string>selected</string>
+                <key>choiceIdentifier</key>
+                <string>launchd</string>
+        </dict>
+</array>
+</plist>
+MUNKICHOICESDONE
+
+	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg "$(/usr/bin/find /Volumes/munkitools -maxdepth 1 \( -iname \*\.pkg -o -iname \*\.mpkg \))" -target "/" 
+
 	${LOGGER} "Installed Munki Admin and Munki Core packages"
-	echo "Installed Munki packages"
+	echo "Installed Munki packages"	 
 	 
 fi	
 
