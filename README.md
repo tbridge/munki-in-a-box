@@ -24,6 +24,10 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 ###Changelog
 
+**NEW in 0.4.1:**
+
+• Munki install code now based on Choices XML and is version independent.
+
 **NEW in 0.4:**
 
 • Inclusion of Munki-Enroll and Sean Kaiser's AutoPKG Automation Scripts  
