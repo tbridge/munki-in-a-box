@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.4.0
+# Version: 0.4.2
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -295,14 +295,14 @@ done
 
 cd ${REPOLOC}
 git clone https://github.com/seankaiser/automation-scripts.git
-mv automation-scripts/autopkg/autopkg-wrapper.sh ${SCRIPTDIR}
-mv automation-scripts/autopkg/com.example.autopkg-wrapper.plist /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
-
-cd ${SCRIPTDIR}
-
+cd ./automation-scripts/autopkg/
+sed -i.orig "s|>autopkg|>${ADMINUSERNAME}|" com.example.autopkg-wrapper.plist
+sed -i.orig2 "s|com.example.autopkg-wrapper|${AUTOPKGORGNAME}.autopkg-wrapper|" com.example.autopkg-wrapper.plist
 sed -i.orig "s|AdobeFlashPlayer.munki|${AUTOPKGRUN}|" autopkg-wrapper.sh
 sed -i.orig2 "s|you@yourdomain.net|${AUTOPKGEMAIL}|" autopkg-wrapper.sh
 sed -i.orig3 "s|user=[\"]autopkg[\"]|user=\"${ADMINUSERNAME}\"|" autopkg-wrapper.sh
+mv autopkg-wrapper.sh ${SCRIPTDIR}
+mv com.example.autopkg-wrapper.plist /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
 launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
@@ -312,11 +312,12 @@ launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
 ####
 
-curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v0.3.0/MunkiAdmin-0.3.0.dmg -o $REPOLOC/munkiadmin.dmg
+cd ${REPOLOC}
+VERS=`curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97` ; curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg -o $REPOLOC/munkiadmin.dmg
 hdiutil attach $REPOLOC/munkiadmin.dmg -nobrowse
-cd /Volumes/MunkiAdmin-0.3.0/
-cp -R /Volumes/MunkiAdmin-0.3.0/MunkiAdmin.app /Applications/Utilities
-hdiutil detach /Volumes/MunkiAdmin-0.3.0 -force
+cd /Volumes/MunkiAdmin-$VERS/
+cp -R /Volumes/MunkiAdmin-$VERS/MunkiAdmin.app /Applications/Utilities
+hdiutil detach /Volumes/MunkiAdmin-$VERS -force
 
 ####
 
