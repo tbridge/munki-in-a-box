@@ -344,8 +344,12 @@ cp munkireport-php/config_default.php munkireport-php/config.php
 chmod +a "_www allow add_file,delete_child" munkireport-php/app/db
 echo "short_open_tag = On" >> ${PHPROOT}/php.ini
 echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkireport-php/config.php 
-
 # This creates a user "root" with password "root"
+
+# This will create the neeeded plist within pkgsinfo to use MunkiReport
+cd ${REPODIR}/pkgsinfo
+curl -s http://localhost/munkireport-php/index.php?/install/plist -o MunkiReport.plist
+makecatalogs
 
 
 ####
