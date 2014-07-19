@@ -58,9 +58,20 @@ fi
 
 if
 	[[ $webstatus == *STOPPED* ]]; then 
-	${LOGGER} "Could not run because the Web Service is stopped"
-	echo "Please turn on Web Services in Server.app"
-	exit 0 # Sorry, turn on the webserver.	
+	${LOGGER} "Web Server is Stopped, trying to start"
+	echo "Web Server is off, Going to try to Enable It with PHP Support."
+	sed -i.orig "s/^#LoadModule php5_module/LoadModule php5_module/g" /etc/apache2/httpd.conf
+	${LOGGER} "Enabled PHP Support"
+	serveradmin start web
+	webstatus=$(serveradmin status web | awk '{print $3}')
+	if
+		[[ $webstatus == *STOPPED* ]]; then
+		${LOGGER} "Web Server is Stopped, Was unable to Start, Quiting"
+		echo "Web Server is off, Was unable to Start, Please start Yourself"
+		exit 0 # Sorry, turn on the webserver.	
+	fi
+	${LOGGER} "Web Server Started"
+	echo "Web Server Started"
 fi
 
 if
