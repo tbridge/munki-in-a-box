@@ -24,6 +24,11 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 ###Changelog
 
+**NEW in 0.5.0 beta**
+
+• Attempting to use Munki2.
+• This is totally broken right now.
+
 **NEW in 0.4.1:**
 
 • Munki install code now based on Choices XML and is version independent.

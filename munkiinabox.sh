@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.4.0
+# Version: 0.5.0 beta 1 - Munki 2 Edition
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -29,7 +29,7 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
+AUTOPKGRUN="AdobeFlashPlayer.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
@@ -67,8 +67,8 @@ if
 
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
 	${LOGGER} "Installing Munki Tools Because They Aren't Present"
-	curl -L https://munkibuilds.org/munkitools-latest.dmg -o $REPOLOC/munkitools.dmg
-	hdiutil attach $REPOLOC/munkitools.dmg -nobrowse -mountpoint /Volumes/munkitools
+	curl -L https://munkibuilds.org/munkitools2-latest.pkg -o $REPOLOC/munkitools2.pkg
+#	hdiutil attach $REPOLOC/munkitools.dmg -nobrowse -mountpoint /Volumes/munkitools
 	
 # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
  	 
@@ -112,7 +112,8 @@ if
 </plist>
 MUNKICHOICESDONE
 
-	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg "$(/usr/bin/find /Volumes/munkitools -maxdepth 1 \( -iname \*\.pkg -o -iname \*\.mpkg \))" -target "/" 
+#	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg $REPOLOC/munkitools2.pkg -target "/" 
+
 
 	${LOGGER} "Installed Munki Admin and Munki Core packages"
 	echo "Installed Munki packages"	 
@@ -312,11 +313,11 @@ launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
 ####
 
-curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v0.3.0/MunkiAdmin-0.3.0.dmg -o $REPOLOC/munkiadmin.dmg
+curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v0.4.0-preview.2/MunkiAdmin-0.4.0-preview.2.dmg -o $REPOLOC/munkiadmin.dmg
 hdiutil attach $REPOLOC/munkiadmin.dmg -nobrowse
-cd /Volumes/MunkiAdmin-0.3.0/
-cp -R /Volumes/MunkiAdmin-0.3.0/MunkiAdmin.app /Applications/Utilities
-hdiutil detach /Volumes/MunkiAdmin-0.3.0 -force
+cd /Volumes/MunkiAdmin-0.4.0-preview.2/
+cp -R MunkiAdmin.app /Applications/Utilities
+hdiutil detach /Volumes/MunkiAdmin-0.4.0-preview.2 -force
 
 ####
 
@@ -354,7 +355,7 @@ echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkir
 ####
 
 rm $REPOLOC/autopkg-latest1.pkg
-rm $REPOLOC/munkitools.dmg
+rm $REPOLOC/munkitools2.pkg
 rm $REPOLOC/munkiadmin.dmg
 
 ${LOGGER} "I put my toys away!"
