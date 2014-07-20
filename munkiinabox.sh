@@ -348,8 +348,11 @@ echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkir
 
 # This will create the neeeded plist within pkgsinfo to use MunkiReport
 cd ${REPODIR}/pkgsinfo
-curl -s http://localhost/munkireport-php/index.php?/install/plist -o MunkiReport.plist
+curl -s http://${HOSTNAME}/munkireport-php/index.php?/install/plist -o MunkiReport.plist
 makecatalogs
+cd ${REPODIR}/manifests
+#Add munkireport to the start of the testing manifest
+/usr/libexec/PlistBuddy -c "Add :managed_installs:0 string munkireport" "testing"
 
 
 ####
