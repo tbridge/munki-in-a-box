@@ -26,8 +26,8 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 **NEW in 0.5.0 beta**
 
-• Attempting to use Munki2.
-• This is totally broken right now.
+• Installs Munki2 instead of Munki
+• Also installs the munkireport-php plist as part of site_default
 
 **NEW in 0.4.1:**
 

@@ -29,7 +29,7 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="AdobeFlashPlayer.munki MakeCatalogs.munki"
+AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
@@ -112,7 +112,7 @@ if
 </plist>
 MUNKICHOICESDONE
 
-#	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg $REPOLOC/munkitools2.pkg -target "/" 
+	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg $REPOLOC/munkitools2.pkg -target "/" 
 
 
 	${LOGGER} "Installed Munki Admin and Munki Core packages"
@@ -346,7 +346,17 @@ echo "short_open_tag = On" >> ${PHPROOT}/php.ini
 echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkireport-php/config.php 
 
 # This creates a user "root" with password "root"
+# Now to download the pkgsinfo file into the right place and add it to the catalogs and site_default manifest:
 
+echo "Downloading the MunkiReport Info"
+
+curl -L http://$HOSTNAME/munkireport-php/index.php?/install/plist -o ${REPODIR}/pkgsinfo/MunkiReport.plist
+
+echo "Downloaded the MunkiReport Info, Now Rebuilding Catalogs"
+
+/usr/local/munki/makecatalogs
+
+${MANU} add-pkg munkireport --manifest site_default
 
 ####
 
