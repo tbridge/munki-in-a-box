@@ -172,6 +172,7 @@ mkdir ${REPONAME}/catalogs
 mkdir ${REPONAME}/manifests
 mkdir ${REPONAME}/pkgs
 mkdir ${REPONAME}/pkgsinfo
+mkdir ${REPONAME}/icons
 
 chmod -R a+rX ${REPONAME}
 chown -R :admin ${REPONAME}
