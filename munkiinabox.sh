@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.4.2
+# Version: 0.4.3
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -347,6 +347,17 @@ echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkir
 
 # This creates a user "root" with password "root"
 
+# Now to download the pkgsinfo file into the right place and add it to the catalogs and site_default manifest:
+
+echo "Downloading the MunkiReport Info"
+
+curl -L http://$HOSTNAME/munkireport-php/index.php?/install/plist -o ${REPODIR}/pkgsinfo/MunkiReport.plist
+
+echo "Downloaded the MunkiReport Info, Now Rebuilding Catalogs"
+
+/usr/local/munki/makecatalogs
+
+${MANU} add-pkg munkireport --manifest site_default
 
 ####
 

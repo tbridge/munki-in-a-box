@@ -24,6 +24,10 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 ###Changelog
 
+**NEW in 0.4.3:**
+
+• Installs Munkireport-php plist to pkgsinfo and adds it to site_default manifest
+
 **NEW in 0.4.2:**
 
 • MunkiAdmin version is no longer hardcoded into the script. It will pull the latest release.
