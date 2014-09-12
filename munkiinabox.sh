@@ -32,10 +32,13 @@ webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
-ADMINUSERNAME="ladmin"
+echo "Admin Username ?: "
+read ADMINUSERNAME
 SCRIPTDIR="/usr/local/bin"
-AUTOPKGEMAIL="youraddress@domain.com"
-AUTOPKGORGNAME="com.technolutionary"
+echo "E-Mail-Adresse ?: "
+read AUTOPKGEMAIL
+echo "Company ? (de.wycomco): "
+read AUTOPKGORGNAME
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests!"
 
@@ -227,6 +230,7 @@ echo "AutoPKG Installed!"
 
 ${DEFAULTS} write com.github.autopkg MUNKI_REPO $REPODIR
 
+autopkg repo-addhttps://github.com/wycomco/autopkg-recipes.git
 autopkg repo-add http://github.com/autopkg/recipes.git
 
 ${DEFAULTS} write com.googlecode.munki.munkiimport editor ${TEXTEDITOR}
