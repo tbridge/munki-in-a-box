@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.5.0 beta 1 - Munki 2 Edition
+# Version: 0.5.1 beta 1 - Munki 2 Edition
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -29,8 +29,7 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki"
-DEFAULTS="/usr/bin/defaults"
+AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki Adium.munki Cyberduck.munki Evernote.munki GoogleEarth.munki Handbrake.munki MSOffice2011Updates.munki Skype.munki Spotify.munki VLC.munki"DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 echo "Admin Username ?: "
 read ADMINUSERNAME
