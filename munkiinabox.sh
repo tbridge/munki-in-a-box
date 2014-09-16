@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Munki In A Box
+# wyManage easyInstall
 # By Tom Bridge, Technolutionary LLC
 # edited by Kevin Leicht - wycomco GmbH 2014
 
-# Version: 0.5.2 - Munki 2 Edition
+# Version: 0.6 - Munki 2 Edition and wycomco. way
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -19,7 +19,7 @@
 # Establish our Basic Variables:
 
 REPOLOC="/var/wycomco/"
-REPONAME="repository<"
+REPONAME="repository"
 REPODIR=${REPOLOC}${REPONAME}
 LOGGER="/usr/bin/logger -t Munki-in-a-Box"
 MUNKILOC="/usr/local/munki"
@@ -33,12 +33,12 @@ webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki Adium.munki Cyberduck.munki Evernote.munki GoogleEarth.munki Handbrake.munki MSOffice2011Updates.munki Skype.munki Spotify.munki VLC.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
-echo "Admin Username ?: "
+echo "Geben Sie den aktuellen Administrator an: "
 read ADMINUSERNAME
 SCRIPTDIR="/usr/local/bin"
-echo "E-Mail-Adresse ?: "
+echo "E-Mail-Adresse des  Administrator: "
 read AUTOPKGEMAIL
-echo "Company ? (de.wycomco): "
+echo "Geben Sie den Kunden an (com.wycomco): "
 read AUTOPKGORGNAME
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests!"
