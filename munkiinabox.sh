@@ -2,8 +2,9 @@
 
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
+# edited by Kevin Leicht - wycomco GmbH 2014
 
-# Version: 0.5.1 beta 1 - Munki 2 Edition
+# Version: 0.5.2 - Munki 2 Edition
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -17,8 +18,8 @@
 
 # Establish our Basic Variables:
 
-REPOLOC="/Users/Shared/"
-REPONAME="munki_repo"
+REPOLOC="/var/wycomco/"
+REPONAME="repository<"
 REPODIR=${REPOLOC}${REPONAME}
 LOGGER="/usr/bin/logger -t Munki-in-a-Box"
 MUNKILOC="/usr/local/munki"
@@ -29,7 +30,8 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki Adium.munki Cyberduck.munki Evernote.munki GoogleEarth.munki Handbrake.munki MSOffice2011Updates.munki Skype.munki Spotify.munki VLC.munki"DEFAULTS="/usr/bin/defaults"
+AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki Adium.munki Cyberduck.munki Evernote.munki GoogleEarth.munki Handbrake.munki MSOffice2011Updates.munki Skype.munki Spotify.munki VLC.munki"
+DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 echo "Admin Username ?: "
 read ADMINUSERNAME
@@ -229,7 +231,7 @@ echo "AutoPKG Installed!"
 
 ${DEFAULTS} write com.github.autopkg MUNKI_REPO $REPODIR
 
-autopkg repo-addhttps://github.com/wycomco/autopkg-recipes.git
+autopkg repo-add https://github.com/wycomco/autopkg-recipes.git
 autopkg repo-add http://github.com/autopkg/recipes.git
 
 ${DEFAULTS} write com.googlecode.munki.munkiimport editor ${TEXTEDITOR}
