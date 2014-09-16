@@ -4,7 +4,11 @@
 # By Tom Bridge, Technolutionary LLC
 # edited by Kevin Leicht - wycomco GmbH 2014
 
+#<<<<<<< HEAD
+# Version: 0.4.3
+#=======
 # Version: 0.6 - Munki 2 Edition and wycomco. way
+#>>>>>>> 752fe55da6d3fd6523e5fec1bce1c15527140cfa
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -17,7 +21,7 @@
 # Pre-Reqs for this script: 10.8/Server 2 or 10.9/Server 3.  Web Services should be turned on.
 
 # Establish our Basic Variables:
-
+mkdir /var/wycomco
 REPOLOC="/var/wycomco/"
 REPONAME="repository"
 REPODIR=${REPOLOC}${REPONAME}
@@ -30,7 +34,7 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki Adium.munki Cyberduck.munki Evernote.munki GoogleEarth.munki Handbrake.munki MSOffice2011Updates.munki Skype.munki Spotify.munki VLC.munki"
+AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox-DE.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools.munki MakeCatalogs.munki Adium.munki Cyberduck.munki Evernote.munki GoogleEarth.munki Handbrake.munki MSOffice2011Updates-DE.munki Skype.munki Spotify.munki VLC.munki"
 DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 echo "Geben Sie den aktuellen Administrator an: "
@@ -232,7 +236,7 @@ echo "AutoPKG Installed!"
 ${DEFAULTS} write com.github.autopkg MUNKI_REPO $REPODIR
 
 autopkg repo-add https://github.com/wycomco/autopkg-recipes.git
-autopkg repo-add http://github.com/autopkg/recipes.git
+autopkg repo-add https://github.com/autopkg/recipes.git
 
 ${DEFAULTS} write com.googlecode.munki.munkiimport editor ${TEXTEDITOR}
 ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path ${REPODIR}
@@ -301,14 +305,14 @@ done
 
 cd ${REPOLOC}
 git clone https://github.com/seankaiser/automation-scripts.git
-mv automation-scripts/autopkg/autopkg-wrapper.sh ${SCRIPTDIR}
-mv automation-scripts/autopkg/com.example.autopkg-wrapper.plist /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
-
-cd ${SCRIPTDIR}
-
+cd ./automation-scripts/autopkg/
+sed -i.orig "s|>autopkg|>${ADMINUSERNAME}|" com.example.autopkg-wrapper.plist
+sed -i.orig2 "s|com.example.autopkg-wrapper|${AUTOPKGORGNAME}.autopkg-wrapper|" com.example.autopkg-wrapper.plist
 sed -i.orig "s|AdobeFlashPlayer.munki|${AUTOPKGRUN}|" autopkg-wrapper.sh
 sed -i.orig2 "s|you@yourdomain.net|${AUTOPKGEMAIL}|" autopkg-wrapper.sh
 sed -i.orig3 "s|user=[\"]autopkg[\"]|user=\"${ADMINUSERNAME}\"|" autopkg-wrapper.sh
+mv autopkg-wrapper.sh ${SCRIPTDIR}
+mv com.example.autopkg-wrapper.plist /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
 launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
@@ -318,11 +322,20 @@ launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
 ####
 
+<<<<<<< HEAD
+cd ${REPOLOC}
+VERS=`curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97` ; curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg -o $REPOLOC/munkiadmin.dmg
+hdiutil attach $REPOLOC/munkiadmin.dmg -nobrowse
+cd /Volumes/MunkiAdmin-$VERS/
+cp -R /Volumes/MunkiAdmin-$VERS/MunkiAdmin.app /Applications/Utilities
+hdiutil detach /Volumes/MunkiAdmin-$VERS -force
+=======
 curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v0.4.0-preview.2/MunkiAdmin-0.4.0-preview.2.dmg -o $REPOLOC/munkiadmin.dmg
 hdiutil attach $REPOLOC/munkiadmin.dmg -nobrowse
 cd /Volumes/MunkiAdmin-0.4.0-preview.2/
 cp -R MunkiAdmin.app /Applications/Utilities
 hdiutil detach /Volumes/MunkiAdmin-0.4.0-preview.2 -force
+>>>>>>> 752fe55da6d3fd6523e5fec1bce1c15527140cfa
 
 ####
 
@@ -361,6 +374,19 @@ echo "Downloaded the MunkiReport Info, Now Rebuilding Catalogs"
 
 /usr/local/munki/makecatalogs
 
+<<<<<<< HEAD
+# Now to download the pkgsinfo file into the right place and add it to the catalogs and site_default manifest:
+
+echo "Downloading the MunkiReport Info"
+
+curl -L http://$HOSTNAME/munkireport-php/index.php?/install/plist -o ${REPODIR}/pkgsinfo/MunkiReport.plist
+
+echo "Downloaded the MunkiReport Info, Now Rebuilding Catalogs"
+
+/usr/local/munki/makecatalogs
+
+=======
+>>>>>>> 752fe55da6d3fd6523e5fec1bce1c15527140cfa
 ${MANU} add-pkg munkireport --manifest site_default
 
 ####
