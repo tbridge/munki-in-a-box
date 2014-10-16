@@ -112,9 +112,8 @@ if
 </plist>
 MUNKICHOICESDONE
 
-	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg $REPOLOC/munkitools2.pkg -target "/" 
-
-
+	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg "$(/usr/bin/find /Volumes/munkitools -maxdepth 1 \( -iname \*\.pkg -o -iname \*\.mpkg \))" -target "/" 
+	
 	${LOGGER} "Installed Munki Admin and Munki Core packages"
 	echo "Installed Munki packages"	 
 	 
@@ -296,14 +295,14 @@ done
 
 cd ${REPOLOC}
 git clone https://github.com/seankaiser/automation-scripts.git
-mv automation-scripts/autopkg/autopkg-wrapper.sh ${SCRIPTDIR}
-mv automation-scripts/autopkg/com.example.autopkg-wrapper.plist /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
-
-cd ${SCRIPTDIR}
-
+cd ./automation-scripts/autopkg/
+sed -i.orig "s|>autopkg|>${ADMINUSERNAME}|" com.example.autopkg-wrapper.plist
+sed -i.orig2 "s|com.example.autopkg-wrapper|${AUTOPKGORGNAME}.autopkg-wrapper|" com.example.autopkg-wrapper.plist
 sed -i.orig "s|AdobeFlashPlayer.munki|${AUTOPKGRUN}|" autopkg-wrapper.sh
 sed -i.orig2 "s|you@yourdomain.net|${AUTOPKGEMAIL}|" autopkg-wrapper.sh
 sed -i.orig3 "s|user=[\"]autopkg[\"]|user=\"${ADMINUSERNAME}\"|" autopkg-wrapper.sh
+mv autopkg-wrapper.sh ${SCRIPTDIR}
+mv com.example.autopkg-wrapper.plist /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
 launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
@@ -313,8 +312,8 @@ launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
 ####
 
-curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v0.4.0-preview.2/MunkiAdmin-0.4.0-preview.2.dmg -o $REPOLOC/munkiadmin.dmg
-hdiutil attach $REPOLOC/munkiadmin.dmg -nobrowse
+cd ${REPOLOC}
+VERS=`curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97` ; curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg -o $REPOLOC/munkiadmin.dmg
 cd /Volumes/MunkiAdmin-0.4.0-preview.2/
 cp -R MunkiAdmin.app /Applications/Utilities
 hdiutil detach /Volumes/MunkiAdmin-0.4.0-preview.2 -force
