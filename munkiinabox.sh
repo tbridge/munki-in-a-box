@@ -68,7 +68,7 @@ if
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
 	${LOGGER} "Installing Munki Tools Because They Aren't Present"
 	curl -L https://munkibuilds.org/munkitools2-latest.pkg -o $REPOLOC/munkitools2.pkg
-#	hdiutil attach $REPOLOC/munkitools.dmg -nobrowse -mountpoint /Volumes/munkitools
+	hdiutil attach $REPOLOC/munkitools2.dmg -nobrowse -mountpoint /Volumes/munkitools
 	
 # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
  	 
