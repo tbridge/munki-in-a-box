@@ -170,6 +170,8 @@ mkdir ${REPONAME}/catalogs
 mkdir ${REPONAME}/manifests
 mkdir ${REPONAME}/pkgs
 mkdir ${REPONAME}/pkgsinfo
+mkdir ${REPONAME}/icons
+mkdir ${REPONAME}/client_resources
 
 chmod -R a+rX ${REPONAME}
 chown -R :wheel ${REPONAME}
