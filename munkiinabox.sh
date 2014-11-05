@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.5.1 - Munki 2 Edition
+# Version: 0.6.0 - Munki 2 Edition
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -13,7 +13,7 @@
 
 # This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski and numerous others who have helped me assemble this script.
 
-# Pre-Reqs for this script: 10.8/Server 2 or 10.9/Server 3.  Web Services should be turned on.
+# Pre-Reqs for this script: 10.8/Server 2 or 10.9/Server 3.  Web Services should be turned on and PHP should be enabled.
 
 # Establish our Basic Variables:
 
@@ -68,8 +68,7 @@ if
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
 	${LOGGER} "Installing Munki Tools Because They Aren't Present"
 	curl -L https://munkibuilds.org/munkitools2-latest.pkg -o $REPOLOC/munkitools2.pkg
-	hdiutil attach $REPOLOC/munkitools2.dmg -nobrowse -mountpoint /Volumes/munkitools
-	
+
 # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
  	 
 	 /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
@@ -112,7 +111,7 @@ if
 </plist>
 MUNKICHOICESDONE
 
-	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg "$(/usr/bin/find /Volumes/munkitools -maxdepth 1 \( -iname \*\.pkg -o -iname \*\.mpkg \))" -target "/" 
+	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg $REPOLOC/munkitools2.pkg -target "/" 
 	
 	${LOGGER} "Installed Munki Admin and Munki Core packages"
 	echo "Installed Munki packages"	 
@@ -173,7 +172,7 @@ mkdir ${REPONAME}/pkgs
 mkdir ${REPONAME}/pkgsinfo
 
 chmod -R a+rX ${REPONAME}
-chown -R :admin ${REPONAME}
+chown -R :wheel ${REPONAME}
 
 ${LOGGER} "Repo Created"
 echo "Repo Created"
@@ -197,7 +196,7 @@ mkdir -p /tmp/ClientInstaller/Library/Preferences/
 HOSTNAME=`/bin/hostname`
 ${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist SoftwareRepoURL "http://$HOSTNAME/${REPONAME}"
 
-/usr/bin/pkgbuild --identifier com.munkibox.client.pkg --root /tmp/ClientInstaller ClientInstaller.pkg
+/usr/bin/pkgbuild --identifier com.munkiinabox.client.pkg --root /tmp/ClientInstaller ClientInstaller.pkg
 
 ${LOGGER} "Client install pkg created."
 echo "Client install pkg is created. It's in the base of the repo."
@@ -314,9 +313,10 @@ launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 
 cd ${REPOLOC}
 VERS=`curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97` ; curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg -o $REPOLOC/munkiadmin.dmg
-cd /Volumes/MunkiAdmin-0.4.0-preview.2/
-cp -R MunkiAdmin.app /Applications/Utilities
-hdiutil detach /Volumes/MunkiAdmin-0.4.0-preview.2 -force
+TMPMOUNT2=`/usr/bin/mktemp -d /tmp/munkiadmin.XXXX`
+hdiutil attach $REPOLOC/munkiadmin.dmg -mountpoint "$TMPMOUNT2" -nobrowse
+cp -R $TMPMOUNT2/MunkiAdmin.app /Applications/Utilities
+hdiutil detach "$TMPMOUNT2" -force
 
 ####
 
