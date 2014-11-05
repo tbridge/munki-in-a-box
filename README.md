@@ -26,7 +26,7 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 **NEW in 0.6.0:**
 
-• Version: 0.6.0 - Munki 2 Edition!
+• Version: 0.6.0 - Munki 2 Edition!  
 • Installs the latest and greatest Munki 2 tools instead of Munki 1. All future builds of Munki in a Box will reference the latest tools.
 
 **NEW in 0.4.3:**
