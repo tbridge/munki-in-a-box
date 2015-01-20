@@ -17,9 +17,9 @@
 
 # Establish our Basic Variables:
 
-REPOLOC="/Users/Shared/"
+REPOLOC="/Users/Shared"
 REPONAME="munki_repo"
-REPODIR=${REPOLOC}${REPONAME}
+REPODIR="${REPOLOC}/${REPONAME}"
 LOGGER="/usr/bin/logger -t Munki-in-a-Box"
 MUNKILOC="/usr/local/munki"
 WEBROOT="/Library/Server/Web/Data/Sites/Default"
@@ -272,12 +272,12 @@ echo "AutoPKG Installed!"
 ####
 
 
-${DEFAULTS} write com.github.autopkg MUNKI_REPO $REPODIR
+${DEFAULTS} write com.github.autopkg MUNKI_REPO "$REPODIR"
 
 autopkg repo-add http://github.com/autopkg/recipes.git
 
-${DEFAULTS} write com.googlecode.munki.munkiimport editor ${TEXTEDITOR}
-${DEFAULTS} write com.googlecode.munki.munkiimport repo_path ${REPODIR}
+${DEFAULTS} write com.googlecode.munki.munkiimport editor "${TEXTEDITOR}"
+${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
 ${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
 
@@ -341,7 +341,7 @@ done
 
 ####
 
-cd ${REPOLOC}
+cd "${REPOLOC}"
 ${GIT} clone https://github.com/seankaiser/automation-scripts.git
 cd ./automation-scripts/autopkg/
 sed -i.orig "s|>autopkg|>${ADMINUSERNAME}|" com.example.autopkg-wrapper.plist
@@ -360,7 +360,7 @@ launchctl load "/Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist"
 
 ####
 
-cd ${REPOLOC}
+cd "${REPOLOC}"
 VERS=$(curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97) ; curl -L "https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg" -o "$REPOLOC/munkiadmin.dmg"
 TMPMOUNT2=$(/usr/bin/mktemp -d /tmp/munkiadmin.XXXX)
 hdiutil attach "$REPOLOC/munkiadmin.dmg" -mountpoint "$TMPMOUNT2" -nobrowse
@@ -373,7 +373,7 @@ hdiutil detach "$TMPMOUNT2" -force
 
 ####
 
-cd ${REPODIR}
+cd "${REPODIR}"
 ${GIT} clone https://github.com/edingc/munki-enroll.git
 mv munki-enroll munki-enroll-host
 mv munki-enroll-host/munki-enroll munki-enroll
@@ -386,7 +386,7 @@ sed -i.orig "s|/munki/|/${HOSTNAME}/|" munki-enroll/munki_enroll.sh
 
 ####
 
-cd ${WEBROOT}
+cd "${WEBROOT}"
 ${GIT} clone https://github.com/munkireport/munkireport-php.git
 cp munkireport-php/config_default.php munkireport-php/config.php
 chmod +a "_www allow add_file,delete_child" munkireport-php/app/db
@@ -412,9 +412,9 @@ ${MANU} add-pkg munkireport --manifest site_default
 
 ####
 
-rm $REPOLOC/autopkg-latest1.pkg
-rm $REPOLOC/munkitools2.pkg
-rm $REPOLOC/munkiadmin.dmg
+rm "$REPOLOC/autopkg-latest1.pkg"
+rm "$REPOLOC/munkitools2.pkg"
+rm "$REPOLOC/munkiadmin.dmg"
 
 ${LOGGER} "I put my toys away!"
 
