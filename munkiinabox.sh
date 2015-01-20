@@ -5,7 +5,7 @@
 
 # Version: 1.0.0 - Munki 2 & 10.10 Edition
 
-# This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
+# This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
 # Approach this script like a swarm of bees: Unless you know what you are doing, keep your distance.
 
@@ -47,48 +47,48 @@ ${LOGGER} "Webstatus Echo!"
 
 ####
 
-# Checks 
+# Checks
 
 ####
 
 ${LOGGER} "Starting Checks!"
 
-if 
-	[[ $osvers -ge 8 ]]; then 
-	${LOGGER} "Mac OS X 10.8 or later is installed!" 
-	else
-		${LOGGER} "Could not run because the version of the OS does not meet requirements"
-		echo "Sorry, this is for Mac OS 10.8 or later."
-	 	exit 1 # 10.8+ for the Web Root Location.
-	
+if
+    [[ $osvers -ge 8 ]]; then
+    ${LOGGER} "Mac OS X 10.8 or later is installed!"
+    else
+        ${LOGGER} "Could not run because the version of the OS does not meet requirements"
+        echo "Sorry, this is for Mac OS 10.8 or later."
+        exit 1 # 10.8+ for the Web Root Location.
+
 fi
 
 if
-	[[ $webstatus == *STOPPED* ]]; then 
-	${LOGGER} "Could not run because the Web Service is stopped"
-	echo "Please turn on Web Services in Server.app"
-	exit 2 # Sorry, turn on the webserver.	
+    [[ $webstatus == *STOPPED* ]]; then
+    ${LOGGER} "Could not run because the Web Service is stopped"
+    echo "Please turn on Web Services in Server.app"
+    exit 2 # Sorry, turn on the webserver.
 fi
 
 # If we pass this point, the Repo gets linked:
 
-	ln -s ${REPODIR} ${WEBROOT}
-	
-	${LOGGER} "The repo is now linked. ${REPODIR} now appears at ${WEBROOT}"
-	
+    ln -s ${REPODIR} ${WEBROOT}
+
+    ${LOGGER} "The repo is now linked. ${REPODIR} now appears at ${WEBROOT}"
+
 if
 
-	[[ ! -f $MUNKILOC/munkiimport ]]; then
+    [[ ! -f $MUNKILOC/munkiimport ]]; then
 
-	${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
-	curl -L https://munkibuilds.org/munkitools2-latest.pkg -o $REPOLOC/munkitools2.pkg
-	
+    ${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
+    curl -L https://munkibuilds.org/munkitools2-latest.pkg -o $REPOLOC/munkitools2.pkg
+
 # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
- 	 
-	 /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
-	 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
+     /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
+     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-	<array>
+    <array>
         <dict>
                 <key>attributeSetting</key>
                 <integer>1</integer>
@@ -125,68 +125,68 @@ if
 </plist>
 MUNKICHOICESDONE
 
-	/usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg $REPOLOC/munkitools2.pkg -target "/" 
-	
-	${LOGGER} "Installed Munki Admin and Munki Core packages"
-	echo "Installed Munki packages"	 
-	
-	else 
-		${LOGGER} "Munki was already installed, I think, so I'm moving on"
-		echo "/usr/local/munki/munkiimport existed, so I am not reinstalling. Hope you really had Munki installed..."
-	 
-fi	
+    /usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg $REPOLOC/munkitools2.pkg -target "/"
+
+    ${LOGGER} "Installed Munki Admin and Munki Core packages"
+    echo "Installed Munki packages"
+
+    else
+        ${LOGGER} "Munki was already installed, I think, so I'm moving on"
+        echo "/usr/local/munki/munkiimport existed, so I am not reinstalling. Hope you really had Munki installed..."
+
+fi
 
 # Check for 10.9 and 10.8 created here by Tim Sutton, for which I owe him a beer. Or six.
 
-if 
-	[[ ! -d /Applications/Xcode.app ]]; then
-	echo "You need to install the Xcode command line tools. Let me get that for you, it'll just take a minute."
+if
+    [[ ! -d /Applications/Xcode.app ]]; then
+    echo "You need to install the Xcode command line tools. Let me get that for you, it'll just take a minute."
 # Get and install Xcode CLI tools
 OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
 
 # in 10.10, the old scheme doesn't work.
 
-	if [ "$OSX_VERS" -eq 10 ]; then
-	
-		touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+    if [ "$OSX_VERS" -eq 10 ]; then
 
-		softwareupdate -i "Command Line Tools (OS X 10.10)-6.1" -v
+        touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
- 	
- 
+        softwareupdate -i "Command Line Tools (OS X 10.10)-6.1" -v
+
+
+
 # on 10.9, we can leverage SUS to get the latest CLI tools
 
 
-	elif [ "$OSX_VERS" -eq 9 ]; then
+    elif [ "$OSX_VERS" -eq 9 ]; then
 
-    # create the placeholder file that's checked by CLI updates' .dist code 
+    # create the placeholder file that's checked by CLI updates' .dist code
     # in Apple's SUS catalog
-    	touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+        touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
     # find the update with "Developer" in the name
-    	PROD=$(softwareupdate -l | grep -B 1 "Developer" | head -n 1 | awk -F"*" '{print $2}')
+        PROD=$(softwareupdate -l | grep -B 1 "Developer" | head -n 1 | awk -F"*" '{print $2}')
 
     # install it
     # amazingly, it won't find the update if we put the update ID in double-quotes
-    	softwareupdate -i $PROD -v
- 
+        softwareupdate -i $PROD -v
+
 # on 10.7/10.8, we instead download from public download URLs, which can be found in
 # the dvtdownloadableindex:
 # https://devimages.apple.com.edgekey.net/downloads/xcode/simulators/index-3905972D-B609-49CE-8D06-51ADC78E07BC.dvtdownloadableindex
-		else
-    	[ "$OSX_VERS" -eq 7 ] && DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg
-    	[ "$OSX_VERS" -eq 8 ] && DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_march_2014.dmg
+        else
+        [ "$OSX_VERS" -eq 7 ] && DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg
+        [ "$OSX_VERS" -eq 8 ] && DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_march_2014.dmg
 
-    		TOOLS=clitools.dmg
-    		curl "$DMGURL" -o "$TOOLS"
-    		TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
-    		hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
-    		installer -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
-    		hdiutil detach "$TMPMOUNT"
-    		rm -rf "$TMPMOUNT"
-    		rm "$TOOLS"
-	fi
-	
+            TOOLS=clitools.dmg
+            curl "$DMGURL" -o "$TOOLS"
+            TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
+            hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
+            installer -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
+            hdiutil detach "$TMPMOUNT"
+            rm -rf "$TMPMOUNT"
+            rm "$TOOLS"
+    fi
+
 fi
 
 echo "Great! All Tests are passed, so let's create the Munki Repo!"
@@ -213,11 +213,11 @@ echo "Repo Created"
 
 ####
 
-if 
-	[[ ! -f /usr/bin/pkgbuild ]]; then
-	${LOGGER} "Pkgbuild is not installed."
-	echo "Please install Xcode command line tools first."
-	exit 0 # Gotta install the command line tools.
+if
+    [[ ! -f /usr/bin/pkgbuild ]]; then
+    ${LOGGER} "Pkgbuild is not installed."
+    echo "Please install Xcode command line tools first."
+    exit 0 # Gotta install the command line tools.
 fi
 
 mkdir -p /tmp/ClientInstaller/Library/Preferences/
@@ -229,7 +229,7 @@ ${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist
 
 ${LOGGER} "Client install pkg created."
 echo "Client install pkg is created. It's in the base of the repo."
-	
+
 ####
 
 # Get AutoPKG
@@ -305,14 +305,14 @@ echo "List of Packages for adding to repo:" ${listofpkgs[*]}
 # Thanks Rich! Code for Array Processing borrowed from First Boot Packager
 # Original at https://github.com/rtrouton/rtrouton_scripts/tree/master/rtrouton_scripts/first_boot_package_install/scripts
 
-tLen=${#listofpkgs[@]} 
+tLen=${#listofpkgs[@]}
 echo $tLen " packages to install"
 
 for (( i=0; i<${tLen}; i++));
-do 
-	${LOGGER} "Adding "${listofpkgs[$i]}" to site_default"
-	${MANU} add-pkg ${listofpkgs[$i]} --manifest site_default
-	${LOGGER} "Added "${listofpkgs[$i]}" to site_default"
+do
+    ${LOGGER} "Adding "${listofpkgs[$i]}" to site_default"
+    ${MANU} add-pkg ${listofpkgs[$i]} --manifest site_default
+    ${LOGGER} "Added "${listofpkgs[$i]}" to site_default"
 done
 
 ####
@@ -371,7 +371,7 @@ git clone https://github.com/munkireport/munkireport-php.git
 cp munkireport-php/config_default.php munkireport-php/config.php
 chmod +a "_www allow add_file,delete_child" munkireport-php/app/db
 echo "short_open_tag = On" >> ${PHPROOT}/php.ini
-echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkireport-php/config.php 
+echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkireport-php/config.php
 
 # This creates a user "root" with password "root"
 # Now to download the pkgsinfo file into the right place and add it to the catalogs and site_default manifest:
