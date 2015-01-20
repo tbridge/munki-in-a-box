@@ -179,7 +179,7 @@ OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
 
             TOOLS=clitools.dmg
             curl "$DMGURL" -o "$TOOLS"
-            TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
+            TMPMOUNT=$(/usr/bin/mktemp -d /tmp/clitools.XXXX)
             hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
             installer -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
             hdiutil detach "$TMPMOUNT"
@@ -222,7 +222,7 @@ fi
 
 mkdir -p /tmp/ClientInstaller/Library/Preferences/
 
-HOSTNAME=`/bin/hostname`
+HOSTNAME=$(/bin/hostname)
 ${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist SoftwareRepoURL "http://$HOSTNAME/${REPONAME}"
 
 /usr/bin/pkgbuild --identifier com.munkiinabox.client.pkg --root /tmp/ClientInstaller ClientInstaller.pkg
@@ -238,7 +238,7 @@ echo "Client install pkg is created. It's in the base of the repo."
 
 # Hat Tip to Allister Banks!
 
-VERS=`curl https://github.com/autopkg/autopkg/releases/latest | cut -c 85-89` ; curl -L https://github.com/autopkg/autopkg/releases/download/v$VERS/autopkg-$VERS.pkg -o autopkg-latest1.pkg
+VERS=$(curl https://github.com/autopkg/autopkg/releases/latest | cut -c 85-89) ; curl -L https://github.com/autopkg/autopkg/releases/download/v$VERS/autopkg-$VERS.pkg -o autopkg-latest1.pkg
 
 installer -pkg autopkg-latest1.pkg -target /
 
@@ -299,7 +299,7 @@ echo "Site_Default created"
 ${MANU} add-catalog testing --manifest site_default
 echo "Testing Catalog added to Site_Default"
 
-listofpkgs=(`${MANU} list-catalog-items testing`)
+listofpkgs=($(${MANU} list-catalog-items testing))
 echo "List of Packages for adding to repo:" ${listofpkgs[*]}
 
 # Thanks Rich! Code for Array Processing borrowed from First Boot Packager
@@ -341,8 +341,8 @@ launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 ####
 
 cd ${REPOLOC}
-VERS=`curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97` ; curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg -o $REPOLOC/munkiadmin.dmg
-TMPMOUNT2=`/usr/bin/mktemp -d /tmp/munkiadmin.XXXX`
+VERS=$(curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97) ; curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg -o $REPOLOC/munkiadmin.dmg
+TMPMOUNT2=$(/usr/bin/mktemp -d /tmp/munkiadmin.XXXX)
 hdiutil attach $REPOLOC/munkiadmin.dmg -mountpoint "$TMPMOUNT2" -nobrowse
 cp -R $TMPMOUNT2/MunkiAdmin.app /Applications/Utilities
 hdiutil detach "$TMPMOUNT2" -force
