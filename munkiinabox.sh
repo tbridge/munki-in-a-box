@@ -322,7 +322,7 @@ done
 ####
 
 cd ${REPOLOC}
-git clone https://github.com/seankaiser/automation-scripts.git
+${GIT} clone https://github.com/seankaiser/automation-scripts.git
 cd ./automation-scripts/autopkg/
 sed -i.orig "s|>autopkg|>${ADMINUSERNAME}|" com.example.autopkg-wrapper.plist
 sed -i.orig2 "s|com.example.autopkg-wrapper|${AUTOPKGORGNAME}.autopkg-wrapper|" com.example.autopkg-wrapper.plist
@@ -354,7 +354,7 @@ hdiutil detach "$TMPMOUNT2" -force
 ####
 
 cd ${REPODIR}
-git clone https://github.com/edingc/munki-enroll.git
+${GIT} clone https://github.com/edingc/munki-enroll.git
 mv munki-enroll munki-enroll-host
 mv munki-enroll-host/munki-enroll munki-enroll
 mv munki-enroll-host/Scripts/munki_enroll.sh munki-enroll
@@ -367,7 +367,7 @@ sed -i.orig "s|/munki/|/${HOSTNAME}/|" munki-enroll/munki_enroll.sh
 ####
 
 cd ${WEBROOT}
-git clone https://github.com/munkireport/munkireport-php.git
+${GIT} clone https://github.com/munkireport/munkireport-php.git
 cp munkireport-php/config_default.php munkireport-php/config.php
 chmod +a "_www allow add_file,delete_child" munkireport-php/app/db
 echo "short_open_tag = On" >> ${PHPROOT}/php.ini
