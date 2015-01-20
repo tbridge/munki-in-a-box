@@ -41,7 +41,7 @@ echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a c
 
 ${LOGGER} "Starting up!"
 
-echo $webstatus
+echo "$webstatus"
 
 ${LOGGER} "Webstatus Echo!"
 
@@ -81,7 +81,7 @@ if
     [[ ! -f $MUNKILOC/munkiimport ]]; then
 
     ${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
-    curl -L https://munkibuilds.org/munkitools2-latest.pkg -o $REPOLOC/munkitools2.pkg
+    curl -L "https://munkibuilds.org/munkitools2-latest.pkg" -o "$REPOLOC/munkitools2.pkg"
 
 # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
 
@@ -181,7 +181,7 @@ OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
             curl "$DMGURL" -o "$TOOLS"
             TMPMOUNT=$(/usr/bin/mktemp -d /tmp/clitools.XXXX)
             hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
-            installer -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
+            installer -pkg "$(find "$TMPMOUNT" -name '*.mpkg')" -target /
             hdiutil detach "$TMPMOUNT"
             rm -rf "$TMPMOUNT"
             rm "$TOOLS"
@@ -238,7 +238,7 @@ echo "Client install pkg is created. It's in the base of the repo."
 
 # Hat Tip to Allister Banks!
 
-VERS=$(curl https://github.com/autopkg/autopkg/releases/latest | cut -c 85-89) ; curl -L https://github.com/autopkg/autopkg/releases/download/v$VERS/autopkg-$VERS.pkg -o autopkg-latest1.pkg
+VERS=$(curl https://github.com/autopkg/autopkg/releases/latest | cut -c 85-89) ; curl -L "https://github.com/autopkg/autopkg/releases/download/v$VERS/autopkg-$VERS.pkg" -o autopkg-latest1.pkg
 
 installer -pkg autopkg-latest1.pkg -target /
 
@@ -306,13 +306,13 @@ echo "List of Packages for adding to repo:" ${listofpkgs[*]}
 # Original at https://github.com/rtrouton/rtrouton_scripts/tree/master/rtrouton_scripts/first_boot_package_install/scripts
 
 tLen=${#listofpkgs[@]}
-echo $tLen " packages to install"
+echo "$tLen" " packages to install"
 
-for (( i=0; i<${tLen}; i++));
+for (( i=0; i<tLen; i++));
 do
-    ${LOGGER} "Adding "${listofpkgs[$i]}" to site_default"
+    ${LOGGER} "Adding ${listofpkgs[$i]} to site_default"
     ${MANU} add-pkg ${listofpkgs[$i]} --manifest site_default
-    ${LOGGER} "Added "${listofpkgs[$i]}" to site_default"
+    ${LOGGER} "Added ${listofpkgs[$i]} to site_default"
 done
 
 ####
@@ -330,9 +330,9 @@ sed -i.orig "s|AdobeFlashPlayer.munki|${AUTOPKGRUN}|" autopkg-wrapper.sh
 sed -i.orig2 "s|you@yourdomain.net|${AUTOPKGEMAIL}|" autopkg-wrapper.sh
 sed -i.orig3 "s|user=[\"]autopkg[\"]|user=\"${ADMINUSERNAME}\"|" autopkg-wrapper.sh
 mv autopkg-wrapper.sh ${SCRIPTDIR}
-mv com.example.autopkg-wrapper.plist /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
+mv com.example.autopkg-wrapper.plist "/Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist"
 
-launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
+launchctl load "/Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist"
 
 ####
 
@@ -341,10 +341,10 @@ launchctl load /Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist
 ####
 
 cd ${REPOLOC}
-VERS=$(curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97) ; curl -L https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg -o $REPOLOC/munkiadmin.dmg
+VERS=$(curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97) ; curl -L "https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg" -o "$REPOLOC/munkiadmin.dmg"
 TMPMOUNT2=$(/usr/bin/mktemp -d /tmp/munkiadmin.XXXX)
-hdiutil attach $REPOLOC/munkiadmin.dmg -mountpoint "$TMPMOUNT2" -nobrowse
-cp -R $TMPMOUNT2/MunkiAdmin.app /Applications/Utilities
+hdiutil attach "$REPOLOC/munkiadmin.dmg" -mountpoint "$TMPMOUNT2" -nobrowse
+cp -R "$TMPMOUNT2/MunkiAdmin.app" /Applications/Utilities
 hdiutil detach "$TMPMOUNT2" -force
 
 ####
@@ -378,7 +378,7 @@ echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkir
 
 echo "Downloading the MunkiReport Info"
 
-curl -k -L https://$HOSTNAME/munkireport-php/index.php?/install/plist -o ${REPODIR}/pkgsinfo/MunkiReport.plist
+curl -k -L "https://$HOSTNAME/munkireport-php/index.php?/install/plist" -o "${REPODIR}/pkgsinfo/MunkiReport.plist"
 
 echo "Downloaded the MunkiReport Info, Now Rebuilding Catalogs"
 
