@@ -193,15 +193,15 @@ echo "Great! All Tests are passed, so let's create the Munki Repo!"
 
 # Create the repo.
 
-cd $REPOLOC
-mkdir ${REPONAME}
-mkdir ${REPONAME}/catalogs
-mkdir ${REPONAME}/manifests
-mkdir ${REPONAME}/pkgs
-mkdir ${REPONAME}/pkgsinfo
+cd "$REPOLOC"
+mkdir "${REPONAME}"
+mkdir "${REPONAME}/catalogs"
+mkdir "${REPONAME}/manifests"
+mkdir "${REPONAME}/pkgs"
+mkdir "${REPONAME}/pkgsinfo"
 
-chmod -R a+rX ${REPONAME}
-chown -R :wheel ${REPONAME}
+chmod -R a+rX "${REPONAME}"
+chown -R :wheel "${REPONAME}"
 
 ${LOGGER} "Repo Created"
 echo "Repo Created"
@@ -370,7 +370,7 @@ cd ${WEBROOT}
 ${GIT} clone https://github.com/munkireport/munkireport-php.git
 cp munkireport-php/config_default.php munkireport-php/config.php
 chmod +a "_www allow add_file,delete_child" munkireport-php/app/db
-echo "short_open_tag = On" >> ${PHPROOT}/php.ini
+echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
 echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkireport-php/config.php
 
 # This creates a user "root" with password "root"
