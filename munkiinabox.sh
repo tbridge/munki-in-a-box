@@ -11,7 +11,7 @@
 
 # The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. I have placed defaults in these variables, but they are easily overridden and you should decide where they go.
 
-# This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski and numerous others who have helped me assemble this script.
+# This script is based upon the Demonstration Setup Guide for Munki, AutoPkg, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski and numerous others who have helped me assemble this script.
 
 # Pre-Reqs for this script: 10.8/Server 2, 10.9/Server 3 or 10.10/Server 4.  Web Services should be turned on and PHP should be enabled.
 
@@ -37,13 +37,13 @@ SCRIPTDIR="/usr/local/bin"
 AUTOPKGEMAIL="youraddress@domain.com"
 AUTOPKGORGNAME="com.technolutionary"
 
-echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests!"
+echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
 
-${LOGGER} "Starting up!"
+${LOGGER} "Starting up..."
 
 echo "$webstatus"
 
-${LOGGER} "Webstatus Echo!"
+${LOGGER} "Webstatus echoed."
 
 ####
 
@@ -51,7 +51,7 @@ ${LOGGER} "Webstatus Echo!"
 
 ####
 
-${LOGGER} "Starting Checks!"
+${LOGGER} "Starting checks..."
 
 # Make sure the whole script stops if Control-C is pressed.
 fn_terminate() {
@@ -209,7 +209,7 @@ OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
 
 fi
 
-echo "Great! All Tests are passed, so let's create the Munki Repo!"
+echo "Great. All Tests are passed, so let's create the Munki Repo"'!'
 
 # Create the repo.
 
@@ -252,7 +252,7 @@ echo "Client install pkg is created. It's in the base of the repo."
 
 ####
 
-# Get AutoPKG
+# Get AutoPkg
 
 ####
 
@@ -262,12 +262,12 @@ VERS=$(curl https://github.com/autopkg/autopkg/releases/latest | cut -c 85-89) ;
 
 installer -pkg autopkg-latest1.pkg -target /
 
-${LOGGER} "AutoPKG Installed"
-echo "AutoPKG Installed!"
+${LOGGER} "AutoPkg Installed"
+echo "AutoPkg Installed"
 
 ####
 
-# Configure AutoPKG for use with Munki
+# Configure AutoPkg for use with Munki
 
 ####
 
@@ -281,10 +281,10 @@ ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
 ${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
 
-${LOGGER} "AutoPKG Configured"
-echo "AutoPKG Configured"
+${LOGGER} "AutoPkg Configured"
+echo "AutoPkg Configured"
 
-# This makes AutoPKG useful on future runs for the admin user defined at the top. It copies & creates preferences for autopkg and munki into their home dir's Library folder, as well as transfers ownership for the ~/Library/AutoPkg folders to them.
+# This makes AutoPkg useful on future runs for the admin user defined at the top. It copies & creates preferences for autopkg and munki into their home dir's Library folder, as well as transfers ownership for the ~/Library/AutoPkg folders to them.
 
 cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Library/Preferences
 cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences
@@ -301,8 +301,8 @@ plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plis
 
 autopkg run -v ${AUTOPKGRUN}
 
-${LOGGER} "AutoPKG Run"
-echo "AutoPKG has run"
+${LOGGER} "AutoPkg Run"
+echo "AutoPkg has run"
 
 # Bring it on home to the all-powerful, all-wise, local admin... (Thanks Luis)
 
@@ -337,7 +337,7 @@ done
 
 ####
 
-# Install AutoPKG Automation Scripts by the amazing Sean Kaiser [[ NOW IN BETA ]]
+# Install AutoPkg Automation Scripts by the amazing Sean Kaiser [[ NOW IN BETA ]]
 
 ####
 
@@ -416,8 +416,8 @@ rm "$REPOLOC/autopkg-latest1.pkg"
 rm "$REPOLOC/munkitools2.pkg"
 rm "$REPOLOC/munkiadmin.dmg"
 
-${LOGGER} "I put my toys away!"
+${LOGGER} "I put my toys away"'!'
 
-echo "Thank you for flying Munki in a Box Air! You now have a working repo, go forth and install your clients!"
+echo "Thank you for flying Munki in a Box Air"'!'" You now have a working repo, go forth and install your clients"'!'
 
 exit 0
