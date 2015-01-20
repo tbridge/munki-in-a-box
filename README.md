@@ -24,6 +24,12 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 ###Changelog
 
+**NEW in 1.0.0:**
+
+• Version: 1.0.0 - Munki 2 & Yosemite!
+• Works with Server 4 and OS X 10.10.
+• Updated checks with better logic and more comments in the code.
+
 **NEW in 0.6.0:**
 
 • Version: 0.6.0 - Munki 2 Edition!  

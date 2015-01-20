@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.7.0 - Munki 2 & 10.10 Edition
+# Version: 1.0.0 - Munki 2 & 10.10 Edition
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -51,12 +51,15 @@ ${LOGGER} "Webstatus Echo!"
 
 ####
 
+${LOGGER} "Starting Checks!"
+
 if 
-	[[ $osvers -ge 8 ]]; then ${LOGGER} "Mac OS X 10.8 or later is installed!" 
+	[[ $osvers -ge 8 ]]; then 
+	${LOGGER} "Mac OS X 10.8 or later is installed!" 
 	else
 		${LOGGER} "Could not run because the version of the OS does not meet requirements"
 		echo "Sorry, this is for Mac OS 10.8 or later."
-	 	exit 0 # 10.8+ for the Web Root Location.
+	 	exit 1 # 10.8+ for the Web Root Location.
 	
 fi
 
@@ -64,16 +67,22 @@ if
 	[[ $webstatus == *STOPPED* ]]; then 
 	${LOGGER} "Could not run because the Web Service is stopped"
 	echo "Please turn on Web Services in Server.app"
-	exit 0 # Sorry, turn on the webserver.	
+	exit 2 # Sorry, turn on the webserver.	
 fi
 
+# If we pass this point, the Repo gets linked:
+
+	ln -s ${REPODIR} ${WEBROOT}
+	
+	${LOGGER} "The repo is now linked. ${REPODIR} now appears at ${WEBROOT}"
+	
 if
 
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
-	ln -s ${REPODIR} ${WEBROOT}
-	${LOGGER} "Installing Munki Tools Because They Aren't Present"
-	curl -L https://munkibuilds.org/munkitools2-latest.pkg -o $REPOLOC/munkitools2.pkg
 
+	${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
+	curl -L https://munkibuilds.org/munkitools2-latest.pkg -o $REPOLOC/munkitools2.pkg
+	
 # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
  	 
 	 /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
@@ -120,13 +129,16 @@ MUNKICHOICESDONE
 	
 	${LOGGER} "Installed Munki Admin and Munki Core packages"
 	echo "Installed Munki packages"	 
+	
+	else 
+		${LOGGER} "Munki was already installed, I think, so I'm moving on"
+		echo "/usr/local/munki/munkiimport existed, so I am not reinstalling. Hope you really had Munki installed..."
 	 
 fi	
 
-# Check created here by Tim Sutton, for which I owe him a beer. Or six.
+# Check for 10.9 and 10.8 created here by Tim Sutton, for which I owe him a beer. Or six.
 
 if 
-
 	[[ ! -d /Applications/Xcode.app ]]; then
 	echo "You need to install the Xcode command line tools. Let me get that for you, it'll just take a minute."
 # Get and install Xcode CLI tools
@@ -134,18 +146,18 @@ OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
 
 # in 10.10, the old scheme doesn't work.
 
-	if [ "OSX_VERS" -eq 10 ]; then
+	if [ "$OSX_VERS" -eq 10 ]; then
 	
 		touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
 		softwareupdate -i "Command Line Tools (OS X 10.10)-6.1" -v
 
- 	else
+ 	
  
 # on 10.9, we can leverage SUS to get the latest CLI tools
 
 
-	if [ "$OSX_VERS" -eq 9 ]; then
+	elif [ "$OSX_VERS" -eq 9 ]; then
 
     # create the placeholder file that's checked by CLI updates' .dist code 
     # in Apple's SUS catalog
@@ -366,7 +378,7 @@ echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkir
 
 echo "Downloading the MunkiReport Info"
 
-curl -L http://$HOSTNAME/munkireport-php/index.php?/install/plist -o ${REPODIR}/pkgsinfo/MunkiReport.plist
+curl -k -L https://$HOSTNAME/munkireport-php/index.php?/install/plist -o ${REPODIR}/pkgsinfo/MunkiReport.plist
 
 echo "Downloaded the MunkiReport Info, Now Rebuilding Catalogs"
 
