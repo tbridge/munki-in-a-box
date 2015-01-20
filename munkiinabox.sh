@@ -53,33 +53,43 @@ ${LOGGER} "Webstatus Echo!"
 
 ${LOGGER} "Starting Checks!"
 
-if
-    [[ $osvers -ge 8 ]]; then
-    ${LOGGER} "Mac OS X 10.8 or later is installed!"
-    else
-        ${LOGGER} "Could not run because the version of the OS does not meet requirements"
-        echo "Sorry, this is for Mac OS 10.8 or later."
-        exit 1 # 10.8+ for the Web Root Location.
+# Make sure the whole script stops if Control-C is pressed.
+fn_terminate() {
+    fn_log_error "Munki-in-a-Box has been terminated."
+    exit 1
+}
+trap 'fn_terminate' SIGINT
 
+if
+    [[ $osvers -lt 8 ]]; then
+    ${LOGGER} "Could not run because the version of the OS does not meet requirements"
+    echo "Sorry, this is for Mac OS 10.8 or later."
+    exit 2 # 10.8+ for the Web Root Location.
 fi
+
+${LOGGER} "Mac OS X 10.8 or later is installed."
 
 if
     [[ $webstatus == *STOPPED* ]]; then
     ${LOGGER} "Could not run because the Web Service is stopped"
     echo "Please turn on Web Services in Server.app"
-    exit 2 # Sorry, turn on the webserver.
+    exit 3 # Sorry, turn on the webserver.
 fi
+
+${LOGGER} "Web service is running."
 
 if
     [[ $EUID -ne 0 ]]; then
     $echo "This script must run as root. Type sudo $0, then press [ENTER]."
-    exit 3
+    exit 4 # Not running as root.
 fi
+
+${LOGGER} "Script is running as root."
 
 if
     [[ ! -d "${WEBROOT}" ]]; then
     echo "No web root exists at ${WEBROOT}. This might be because you don't have Server.app installed and configured."
-    exit 4 # Web Root folder doesn't exist.
+    exit 5 # Web Root folder doesn't exist.
 fi
 
 # If we pass this point, the Repo gets linked:
@@ -89,9 +99,7 @@ fi
     ${LOGGER} "The repo is now linked. ${REPODIR} now appears at ${WEBROOT}"
 
 if
-
     [[ ! -f $MUNKILOC/munkiimport ]]; then
-
     ${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
     curl -L "https://munkibuilds.org/munkitools2-latest.pkg" -o "$REPOLOC/munkitools2.pkg"
 
@@ -137,7 +145,7 @@ if
 </plist>
 MUNKICHOICESDONE
 
-    /usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML /tmp/com.github.munki-in-a-box.munkiinstall.xml -pkg $REPOLOC/munkitools2.pkg -target "/"
+    /usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML "/tmp/com.github.munki-in-a-box.munkiinstall.xml" -pkg "$REPOLOC/munkitools2.pkg" -target "/"
 
     ${LOGGER} "Installed Munki Admin and Munki Core packages"
     echo "Installed Munki packages"
