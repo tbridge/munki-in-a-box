@@ -70,9 +70,21 @@ if
     exit 2 # Sorry, turn on the webserver.
 fi
 
+if
+    [[ $EUID -ne 0 ]]; then
+    $echo "This script must run as root. Type sudo $0, then press [ENTER]."
+    exit 3
+fi
+
+if
+    [[ ! -d "${WEBROOT}" ]]; then
+    echo "No web root exists at ${WEBROOT}. This might be because you don't have Server.app installed and configured."
+    exit 4 # Web Root folder doesn't exist.
+fi
+
 # If we pass this point, the Repo gets linked:
 
-    ln -s ${REPODIR} ${WEBROOT}
+    ln -s "${REPODIR}" "${WEBROOT}"
 
     ${LOGGER} "The repo is now linked. ${REPODIR} now appears at ${WEBROOT}"
 
