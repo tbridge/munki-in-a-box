@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 0.6.0 - Munki 2 Edition
+# Version: 0.7.0 - Munki 2 & 10.10 Edition
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report. 
 
@@ -13,7 +13,7 @@
 
 # This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski and numerous others who have helped me assemble this script.
 
-# Pre-Reqs for this script: 10.8/Server 2 or 10.9/Server 3.  Web Services should be turned on and PHP should be enabled.
+# Pre-Reqs for this script: 10.8/Server 2, 10.9/Server 3 or 10.10/Server 4.  Web Services should be turned on and PHP should be enabled.
 
 # Establish our Basic Variables:
 
@@ -39,7 +39,11 @@ AUTOPKGORGNAME="com.technolutionary"
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests!"
 
+${LOGGER} "Starting up!"
+
 echo $webstatus
+
+${LOGGER} "Webstatus Echo!"
 
 ####
 
@@ -48,7 +52,7 @@ echo $webstatus
 ####
 
 if 
-	[[ $osvers -ge 8 ]]; then sudo ln -s ${REPODIR} ${WEBROOT}
+	[[ $osvers -ge 8 ]]; then ${LOGGER} "Mac OS X 10.8 or later is installed!" 
 	else
 		${LOGGER} "Could not run because the version of the OS does not meet requirements"
 		echo "Sorry, this is for Mac OS 10.8 or later."
@@ -66,6 +70,7 @@ fi
 if
 
 	[[ ! -f $MUNKILOC/munkiimport ]]; then
+	ln -s ${REPODIR} ${WEBROOT}
 	${LOGGER} "Installing Munki Tools Because They Aren't Present"
 	curl -L https://munkibuilds.org/munkitools2-latest.pkg -o $REPOLOC/munkitools2.pkg
 
@@ -126,9 +131,21 @@ if
 	echo "You need to install the Xcode command line tools. Let me get that for you, it'll just take a minute."
 # Get and install Xcode CLI tools
 OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
+
+# in 10.10, the old scheme doesn't work.
+
+	if [ "OSX_VERS" -eq 10 ]; then
+	
+		touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+
+		softwareupdate -i "Command Line Tools (OS X 10.10)-6.1" -v
+
+ 	else
  
 # on 10.9, we can leverage SUS to get the latest CLI tools
-	if [ "$OSX_VERS" -ge 9 ]; then
+
+
+	if [ "$OSX_VERS" -eq 9 ]; then
 
     # create the placeholder file that's checked by CLI updates' .dist code 
     # in Apple's SUS catalog
@@ -371,4 +388,4 @@ ${LOGGER} "I put my toys away!"
 
 echo "Thank you for flying Munki in a Box Air! You now have a working repo, go forth and install your clients!"
 
-exit
+exit 0
