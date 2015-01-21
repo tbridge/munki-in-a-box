@@ -24,6 +24,11 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 ###Changelog
 
+**NEW in 1.0.1:**
+
+• Integrated better tests and escapes (thanks Elliot Jordan)
+• Altered and fixed Developer Tools downloads (thanks Rich Trouton)
+
 **NEW in 1.0.0:**
 
 • Version: 1.0.0 - Munki 2 & Yosemite!
