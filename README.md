@@ -26,13 +26,13 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 **NEW in 1.0.1:**
 
-• Integrated better tests and escapes (thanks Elliot Jordan)
+• Integrated better tests and escapes (thanks Elliot Jordan)  
 • Altered and fixed Developer Tools downloads (thanks Rich Trouton)
 
 **NEW in 1.0.0:**
 
-• Version: 1.0.0 - Munki 2 & Yosemite!
-• Works with Server 4 and OS X 10.10.
+• Version: 1.0.0 - Munki 2 & Yosemite!  
+• Works with Server 4 and OS X 10.10.  
 • Updated checks with better logic and more comments in the code.
 
 **NEW in 0.6.0:**
