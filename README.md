@@ -24,6 +24,11 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 ###Changelog
 
+**NEW in 1.0.2:**
+
+• Updated Command Line Tools section with changes from Rich Trouton (Thanks Rich!)  
+• Cleanup
+
 **NEW in 1.0.1:**
 
 • Integrated better tests and escapes (thanks Elliot Jordan)  

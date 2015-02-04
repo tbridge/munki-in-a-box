@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 1.0.1 - Munki 2 & 10.10 Edition
+# Version: 1.0.2 - Munki 2 & 10.10 Edition
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
@@ -190,7 +190,7 @@ cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in
 	
 	# Remove the temp file
 	
-		if [[ -f "cmd_line_tools_temp_file" ]]; then
+		if [[ -f "$cmd_line_tools_temp_file" ]]; then
 	  rm "$cmd_line_tools_temp_file"
 		fi
 	fi
@@ -208,7 +208,7 @@ cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in
 		fi
 	
 		if [[ "$osx_vers" -eq 8 ]]; then
-	     DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_march_2014.dmg
+	     DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2014.dmg
 		fi
  
 		TOOLS=clitools.dmg
