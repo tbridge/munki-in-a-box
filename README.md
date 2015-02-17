@@ -6,11 +6,11 @@ Post Munki Install Simple Deployment Script
 
 The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. I have placed defaults in these variables, but they are easily overridden and you should decide where they go.
 
-This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Pepijn Bruienne and numerous others who have helped me assemble this script.
+This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Pepijn Bruienne, the Linde Group and numerous others who have helped me assemble this script. The Mac Admins Community is supportive and awesome.
 
 ###Pre-Requisites:
 
-1) 10.8/Server 2 or 10.9/Server 3  
+1) 10.8/Server 2, 10.9/Server 3 or 10.10/Server 4
 2) Web Services Enabled
 
 ###Directions for Use:
@@ -22,8 +22,52 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 5) Alter Lines 37-38 to reflect AutoPKG Automation Scripts  
 6) sudo ./munkiinabox.sh  
 
+##Caveats: 
+
+When you setup AutoPkgr, be sure to understand the security implications of giving that GUI app, and its associated launchdaemons, access to the keychain. You should really use a one-off account for those notifications, and not, say, the admin account to your Google Domain. Just sayin'.
+
+### Included Tools & Projects:
+
+##Munki
+
+[Munki](https://github.com/munki/munki) is a client management solution for the Mac. I'm assuming you know a little bit about how Munki works by installing it via this script, but I would be remiss not to point you to [Munki's official documentation](https://github.com/munki/munki/wiki). It is mostly installed in /usr/local/munki
+
+##MunkiAdmin
+
+[MunkiAdmin](http://hjuutilainen.github.io/munkiadmin/) is Hannes Juutilainen's native GUI application for managing Munki repositories. It is super handy for those who prefer graphical interfaces to their inscrutable XML files.  It is installed in the /Application/Utilities directory.
+
+##AutoPkg
+
+[AutoPkg](http://autopkg.github.io/autopkg/) is an automated updates tool, used primarily from the command line, or through AutoPkgr, to keep a set of application installers up to date, and part of your Munki repository. AutoPkg is recipe-based, which means anyone can write their own recipe list and make it available. We are importing the main recipe repository, but if you want to add your own later, the AutoPkg docs will tell you how. Autopkg is installed in the /usr/local/bin directory.
+
+##AutoPkgr
+
+[AutoPkgr](http://www.lindegroup.com/autopkgr) is The Linde Group's native GUI application used for managing AutoPkg's command line functionality. In specific, you can configure it to periodically check for new updates, import those into your Munki repository, then email you about what new versions have been imported for testing. It is installed in the /Application/Utilities directory.
+
+##Munkireport-php
+
+[Munkireport-php](https://github.com/munkireport/munkireport-php) is a lightweight reporting engine for your munki interface. It requires the installation of a nopkg item in Munki, which is already part of your site_default catalog. The webpage is viewable at http://YOURHOSTNAMEGOESHERE/munkireport-php/
+
+The default user & pass are root:root. You can add a user by going to:
+
+http://YOURHOSTNAMEGOESHERE/munkireport-php/index.php?/auth/generate
+
+Then you must add that configuration line into the config.php file in $WEBROOT/munkireport-php/
+
+For more information on munkireport-php, please be sure to [visit their documentation](https://github.com/munkireport/munkireport-php/blob/master/docs/setup.md).
+
+##Munki-enroll
+
+[Munki-enroll](https://github.com/edingc/munki-enroll) is a way to have your bootstrap munki clients end up with their very own manifest without you having to set it up yourself. This is not configured by default yet.
+
+
 ###Changelog
 
+**NEW in 1.1.0:**
+
+• Inclusion of Linde Group's AutoPkgr project, which is replacing Sean Kaiser's notification scripts. This isn't a statement of judgment on the quality of Sean's scripts -- which are amazing -- but rather a statement that you may want a GUI utility with more fiddly bits. I've left Sean's code in if you want a more simple environment, and you can choose to uncomment his code around lines 350 or so. Just uncomment that section.  
+• Fixes to Documentation and Code Comments.  
+ 
 **NEW in 1.0.2:**
 
 • Updated Command Line Tools section with changes from Rich Trouton (Thanks Rich!)  

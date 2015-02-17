@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 1.0.2 - Munki 2 & 10.10 Edition
+# Version: 1.1.0 - AutoPkgr Included!
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
@@ -11,7 +11,7 @@
 
 # The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. There are default values in these variables, but they are easily overridden and you should decide where they go.
 
-# This script is based upon the Demonstration Setup Guide for Munki, AutoPkg, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski, Elliot Jordan and numerous others who have helped me assemble this script.
+# This script is based upon the Demonstration Setup Guide for Munki, AutoPkg, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski, Elliot Jordan, The Linde Group and numerous others who have helped me assemble this script.
 
 # Pre-Reqs for this script: 10.8/Server 2, 10.9/Server 3 or 10.10/Server 4.  Web Services should be turned on and PHP should be enabled.
 
@@ -34,8 +34,9 @@ DEFAULTS="/usr/bin/defaults"
 MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
 SCRIPTDIR="/usr/local/bin"
-AUTOPKGEMAIL="youraddress@domain.com"
-AUTOPKGORGNAME="com.technolutionary"
+## Below are for Sean Kaiser's Scripts. Uncomment to Use.
+#AUTOPKGEMAIL="youraddress@domain.com"
+#AUTOPKGORGNAME="com.technolutionary"
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
 
@@ -347,20 +348,51 @@ done
 
 ####
 # Install AutoPkg Automation Scripts by the amazing Sean Kaiser
+# Uncomment this section to install 
 ####
 
-cd "${REPOLOC}"
-${GIT} clone https://github.com/seankaiser/automation-scripts.git
-cd ./automation-scripts/autopkg/
-sed -i.orig "s|>autopkg|>${ADMINUSERNAME}|" com.example.autopkg-wrapper.plist
-sed -i.orig2 "s|com.example.autopkg-wrapper|${AUTOPKGORGNAME}.autopkg-wrapper|" com.example.autopkg-wrapper.plist
-sed -i.orig "s|AdobeFlashPlayer.munki|${AUTOPKGRUN}|" autopkg-wrapper.sh
-sed -i.orig2 "s|you@yourdomain.net|${AUTOPKGEMAIL}|" autopkg-wrapper.sh
-sed -i.orig3 "s|user=[\"]autopkg[\"]|user=\"${ADMINUSERNAME}\"|" autopkg-wrapper.sh
-mv autopkg-wrapper.sh ${SCRIPTDIR}
-mv com.example.autopkg-wrapper.plist "/Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist"
+# cd "${REPOLOC}"
+# ${GIT} clone https://github.com/seankaiser/automation-scripts.git
+# cd ./automation-scripts/autopkg/
+# sed -i.orig "s|>autopkg|>${ADMINUSERNAME}|" com.example.autopkg-wrapper.plist
+# sed -i.orig2 "s|com.example.autopkg-wrapper|${AUTOPKGORGNAME}.autopkg-wrapper|" com.example.autopkg-wrapper.plist
+# sed -i.orig "s|AdobeFlashPlayer.munki|${AUTOPKGRUN}|" autopkg-wrapper.sh
+# sed -i.orig2 "s|you@yourdomain.net|${AUTOPKGEMAIL}|" autopkg-wrapper.sh
+# sed -i.orig3 "s|user=[\"]autopkg[\"]|user=\"${ADMINUSERNAME}\"|" autopkg-wrapper.sh
+# mv autopkg-wrapper.sh ${SCRIPTDIR}
+# mv com.example.autopkg-wrapper.plist "/Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist"
+# 
+# launchctl load "/Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist"
 
-launchctl load "/Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist"
+####
+# Install AutoPkgr from the awesome Linde Group!
+####
+
+VERS=$(curl https://github.com/lindegroup/autopkgr/releases/latest | cut -c 89-91) ; curl -L "https://github.com/lindegroup/autopkgr/releases/download/v$VERS/AutoPkgr-$VERS.dmg" -o "$REPOLOC/AutoPkgr.dmg"
+
+TMPMOUNT3=$(/usr/bin/mktemp -d /tmp/autopkgr.XXXX)
+hdiutil attach "$REPOLOC/AutoPkgr.dmg" -mountpoint "$TMPMOUNT3" -nobrowse
+cp -R "$TMPMOUNT3/AutoPkgr.app" /Applications/Utilities
+hdiutil detach "$TMPMOUNT3" -force
+
+${LOGGER} "AutoPkgr Installed"
+echo "AutoPkgr Installed"
+
+mkdir /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
+touch /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr/recipe_list.txt
+
+echo "com.github.autopkg.munki.FlashPlayerNoRepackage
+com.github.autopkg.munki.AdobeReader
+com.github.autopkg.munki.dropbox
+com.github.autopkg.munki.firefox-rc-en_US
+com.github.autopkg.munki.google-chrome
+com.github.autopkg.munki.OracleJava8
+com.github.autopkg.munki.OracleJava7
+com.github.autopkg.munki.textwrangler
+com.github.autopkg.munki.munkitools2
+com.github.autopkg.munki.makecatalogs" > /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr/recipe_list.txt
+
+chown -R $ADMINUSERNAME /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
 
 ####
 # Install Munki Admin App by the amazing Hannes Juutilainen
@@ -415,9 +447,10 @@ ${MANU} add-pkg munkireport --manifest site_default
 rm "$REPOLOC/autopkg-latest1.pkg"
 rm "$REPOLOC/munkitools2.pkg"
 rm "$REPOLOC/munkiadmin.dmg"
+rm "$REPOLOC/AutoPkgr.dmg"
 
-${LOGGER} "I put my toys away"'!'
+${LOGGER} "I put my toys away."
 
-echo "Thank you for flying Munki in a Box Air"'!'" You now have a working repo, go forth and install your clients"'!'
+echo "Thank you for flying Munki in a Box Air. You now have a working repo, go forth and install your clients."
 
 exit 0
