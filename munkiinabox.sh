@@ -275,7 +275,8 @@ echo "Client install pkg is created. It's in the base of the repo."
 
 # Hat Tip to Allister Banks!
 
-VERS=$(curl https://github.com/autopkg/autopkg/releases/latest | cut -c 85-89) ; curl -L "https://github.com/autopkg/autopkg/releases/download/v$VERS/autopkg-$VERS.pkg" -o autopkg-latest1.pkg
+AUTOPKG_LATEST=$(curl https://api.github.com/repos/autopkg/autopkg/releases | python -c 'import json,sys;obj=json.load(sys.stdin);print obj[0]["assets"][0]["browser_download_url"]')
+curl -L "${AUTOPKG_LATEST}" -o autopkg-latest1.pkg
 
 installer -pkg autopkg-latest1.pkg -target /
 
