@@ -216,7 +216,7 @@ cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in
 		curl "$DMGURL" -o "$TOOLS"
 		TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
 		hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
-		installer -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
+		installer -allowUntrusted -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
 		hdiutil detach "$TMPMOUNT"
 		rm -rf "$TMPMOUNT"
 		rm "$TOOLS"
@@ -242,7 +242,7 @@ mkdir "${REPONAME}/pkgs"
 mkdir "${REPONAME}/pkgsinfo"
 
 chmod -R a+rX "${REPONAME}"
-chown -R :wheel "${REPONAME}"
+chown -R :admin "${REPONAME}"
 
 ${LOGGER} "Repo Created"
 echo "Repo Created"
@@ -273,7 +273,7 @@ echo "Client install pkg is created. It's in the base of the repo."
 # Get AutoPkg
 ####
 
-# Hat Tip to Allister Banks!
+# Nod and Toast to Nate Felton!
 
 AUTOPKG_LATEST=$(curl https://api.github.com/repos/autopkg/autopkg/releases | python -c 'import json,sys;obj=json.load(sys.stdin);print obj[0]["assets"][0]["browser_download_url"]')
 curl -L "${AUTOPKG_LATEST}" -o autopkg-latest1.pkg
@@ -348,33 +348,12 @@ do
 done
 
 ####
-# Install AutoPkg Automation Scripts by the amazing Sean Kaiser
-# Uncomment this section to install 
-####
-
-# cd "${REPOLOC}"
-# ${GIT} clone https://github.com/seankaiser/automation-scripts.git
-# cd ./automation-scripts/autopkg/
-# sed -i.orig "s|>autopkg|>${ADMINUSERNAME}|" com.example.autopkg-wrapper.plist
-# sed -i.orig2 "s|com.example.autopkg-wrapper|${AUTOPKGORGNAME}.autopkg-wrapper|" com.example.autopkg-wrapper.plist
-# sed -i.orig "s|AdobeFlashPlayer.munki|${AUTOPKGRUN}|" autopkg-wrapper.sh
-# sed -i.orig2 "s|you@yourdomain.net|${AUTOPKGEMAIL}|" autopkg-wrapper.sh
-# sed -i.orig3 "s|user=[\"]autopkg[\"]|user=\"${ADMINUSERNAME}\"|" autopkg-wrapper.sh
-# mv autopkg-wrapper.sh ${SCRIPTDIR}
-# mv com.example.autopkg-wrapper.plist "/Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist"
-# 
-# launchctl load "/Library/LaunchDaemons/${AUTOPKGORGNAME}.autopkg-wrapper.plist"
-
-####
 # Install AutoPkgr from the awesome Linde Group!
 ####
 
-VERS=$(curl https://github.com/lindegroup/autopkgr/releases/latest | cut -c 89-91) ; curl -L "https://github.com/lindegroup/autopkgr/releases/download/v$VERS/AutoPkgr-$VERS.dmg" -o "$REPOLOC/AutoPkgr.dmg"
+autopkg repo-add rtrouton-recipes
 
-TMPMOUNT3=$(/usr/bin/mktemp -d /tmp/autopkgr.XXXX)
-hdiutil attach "$REPOLOC/AutoPkgr.dmg" -mountpoint "$TMPMOUNT3" -nobrowse
-cp -R "$TMPMOUNT3/AutoPkgr.app" /Applications/Utilities
-hdiutil detach "$TMPMOUNT3" -force
+autopkg run AutoPkgr.install
 
 ${LOGGER} "AutoPkgr Installed"
 echo "AutoPkgr Installed"
@@ -399,12 +378,9 @@ chown -R $ADMINUSERNAME /Users/$ADMINUSERNAME/Library/Application\ Support/AutoP
 # Install Munki Admin App by the amazing Hannes Juutilainen
 ####
 
-cd "${REPOLOC}"
-VERS=$(curl https://github.com/hjuutilainen/munkiadmin/releases/latest | cut -c 93-97) ; curl -L "https://github.com/hjuutilainen/munkiadmin/releases/download/v$VERS/munkiadmin-$VERS.dmg" -o "$REPOLOC/munkiadmin.dmg"
-TMPMOUNT2=$(/usr/bin/mktemp -d /tmp/munkiadmin.XXXX)
-hdiutil attach "$REPOLOC/munkiadmin.dmg" -mountpoint "$TMPMOUNT2" -nobrowse
-cp -R "$TMPMOUNT2/MunkiAdmin.app" /Applications/Utilities
-hdiutil detach "$TMPMOUNT2" -force
+autopkg repo-add jleggat-recipes
+
+autopkg run MunkiAdmin.install
 
 ####
 # Install Munki Enroll

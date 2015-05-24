@@ -42,7 +42,7 @@ When you setup AutoPkgr, be sure to understand the security implications of givi
 
 ##AutoPkgr
 
-[AutoPkgr](http://www.lindegroup.com/autopkgr) is The Linde Group's native GUI application used for managing AutoPkg's command line functionality. In specific, you can configure it to periodically check for new updates, import those into your Munki repository, then email you about what new versions have been imported for testing. It is installed in the /Application/Utilities directory.
+[AutoPkgr](http://www.lindegroup.com/autopkgr) is The Linde Group's native GUI application used for managing AutoPkg's command line functionality. Specifically, you can configure it to periodically check for new updates, import those into your Munki repository, then email you about what new versions have been imported for testing. It is installed in the /Application/Utilities directory.
 
 ##Munkireport-php
 
@@ -62,6 +62,13 @@ For more information on munkireport-php, please be sure to [visit their document
 
 
 ###Changelog
+
+**NEW in 1.2.0:**
+
+• Switch from direct download from Github of MunkiAdmin and AutoPkgr to install via AutoPkg. Why didn't I do this sooner?!
+• Inclusion of Nate Felton's python code to download AutoPkg (Thanks Nate!)
+• Inclusion of -allowUntrusted for Mountain Lion Developer Tools, presaging the expiry of that particular certificate
+• Fix of permissions issue.
 
 **NEW in 1.1.0:**
 
