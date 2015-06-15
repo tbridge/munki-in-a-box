@@ -174,7 +174,7 @@ cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in
  
 # Installing the latest Xcode command line tools on 10.9.x or 10.10.x
  
-	if [[ "$osx_vers" -eq 9 ]] || [[ "$osx_vers" -eq 10 ]]; then
+	if [[ "$osx_vers" -ge 9 ]] ; then
  
 	# Create the placeholder file which is checked by the softwareupdate tool 
 	# before allowing the installation of the Xcode command line tools.
