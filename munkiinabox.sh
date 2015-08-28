@@ -399,19 +399,37 @@ sed -i.orig "s|/munki/|/${HOSTNAME}/|" munki-enroll/munki_enroll.sh
 
 cd "${WEBROOT}"
 ${GIT} clone https://github.com/munkireport/munkireport-php.git
-cp munkireport-php/config_default.php munkireport-php/config.php
-chmod +a "_www allow add_file,delete_child" munkireport-php/app/db
+MR_CONFIG="munkireport-php/config.php"
+MR_BASEURL="https://$HOSTNAME/munkireport-php/index.php?"
+MR_DB_DIR="/var/munkireport"
+
+# Create database directory
+mkdir -p $MR_DB_DIR
+chmod +a "_www allow add_file,delete_child" $MR_DB_DIR
+
+echo "<?php" > ${MR_CONFIG}
+echo >> ${MR_CONFIG}
+echo "\$conf['pdo_dsn'] = 'sqlite:$MR_DB_DIR/db.sqlite';" >> ${MR_CONFIG}
+
 echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
-echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> munkireport-php/config.php
+echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> ${MR_CONFIG}
 
 # This creates a user "root" with password "root"
 # Now to download the pkgsinfo file into the right place and add it to the catalogs and site_default manifest:
 
-echo "Downloading the MunkiReport Info"
+echo "Downloading available modules"
 
-curl -k -L "https://$HOSTNAME/munkireport-php/index.php?/install/plist" -o "${REPODIR}/pkgsinfo/MunkiReport.plist"
+curl -k -L "$MR_BASEURL/install/dump_modules/config" >> ${MR_CONFIG}
 
-echo "Downloaded the MunkiReport Info, Now Rebuilding Catalogs"
+echo "Creating the MunkiReport Client installer package"
+
+bash -c "$(curl -k -L $MR_BASEURL/install)" bash -i ${REPOLOC}
+
+echo "Importing the munkireport Client installer package"
+
+$MUNKILOC/munkiimport -n "$REPOLOC/munkireport-"*.pkg
+
+echo "Imported the MunkiReport Client installer package, Now Rebuilding Catalogs"
 
 /usr/local/munki/makecatalogs
 
@@ -425,6 +443,7 @@ rm "$REPOLOC/autopkg-latest1.pkg"
 rm "$REPOLOC/munkitools2.pkg"
 rm "$REPOLOC/munkiadmin.dmg"
 rm "$REPOLOC/AutoPkgr.dmg"
+rm "$REPOLOC/munkireport-"*.pkg
 
 ${LOGGER} "I put my toys away."
 
