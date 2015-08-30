@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 1.1.0 - AutoPkgr Included!
+# Version: 1.2.1 - AutoPkgr Included!
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
@@ -241,8 +241,8 @@ mkdir "${REPONAME}/manifests"
 mkdir "${REPONAME}/pkgs"
 mkdir "${REPONAME}/pkgsinfo"
 
-chmod -R a+rX "${REPONAME}"
-chown -R :admin "${REPONAME}"
+chmod -R a+rX,g+w "${REPONAME}" ## Thanks Arek!
+chown -R ${ADMINUSERNAME}:admin "${REPONAME}" ## Thanks Arek!
 
 ${LOGGER} "Repo Created"
 echo "Repo Created"

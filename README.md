@@ -22,6 +22,8 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 5) Alter Lines 37-38 to reflect AutoPKG Automation Scripts  
 6) sudo ./munkiinabox.sh  
 
+If you do not make changes to the script before running it, the script may not run as intended. Please double-check to make sure that you are comfortable with the variables' values.
+
 ##Caveats: 
 
 When you setup AutoPkgr, be sure to understand the security implications of giving that GUI app, and its associated launchdaemons, access to the keychain. You should really use a one-off account for those notifications, and not, say, the admin account to your Google Domain. Just sayin'.
@@ -63,11 +65,15 @@ For more information on munkireport-php, please be sure to [visit their document
 
 ###Changelog
 
+**NEW in 1.2.1:**
+
+• Maintenance release, with suggested fixes from Arek Dreyer, Allister Banks and others. Thanks, everyone!
+
 **NEW in 1.2.0:**
 
-• Switch from direct download from Github of MunkiAdmin and AutoPkgr to install via AutoPkg. Why didn't I do this sooner?!
-• Inclusion of Nate Felton's python code to download AutoPkg (Thanks Nate!)
-• Inclusion of -allowUntrusted for Mountain Lion Developer Tools, presaging the expiry of that particular certificate
+• Switch from direct download from Github of MunkiAdmin and AutoPkgr to install via AutoPkg.  
+• Inclusion of Nate Felton's python code to download AutoPkg (Thanks Nate!)  
+• Inclusion of -allowUntrusted for Mountain Lion Developer Tools, presaging the expiry of that particular certificate  
 • Fix of permissions issue.
 
 **NEW in 1.1.0:**
