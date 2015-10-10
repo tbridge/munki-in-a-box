@@ -31,6 +31,7 @@ osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools2.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
+AUTOPKG="/usr/local/bin/autopkg"
 MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
 SCRIPTDIR="/usr/local/bin"
@@ -290,7 +291,7 @@ echo "AutoPkg Installed"
 
 ${DEFAULTS} write com.github.autopkg MUNKI_REPO "$REPODIR"
 
-autopkg repo-add http://github.com/autopkg/recipes.git
+${AUTOPKG} repo-add http://github.com/autopkg/recipes.git
 
 ${DEFAULTS} write com.googlecode.munki.munkiimport editor "${TEXTEDITOR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
@@ -313,7 +314,7 @@ plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plis
 # Get some Packages and Stuff them in Munki
 ####
 
-autopkg run -v ${AUTOPKGRUN}
+${AUTOPKG} run -v ${AUTOPKGRUN}
 
 ${LOGGER} "AutoPkg Run"
 echo "AutoPkg has run"
@@ -351,9 +352,9 @@ done
 # Install AutoPkgr from the awesome Linde Group!
 ####
 
-autopkg repo-add rtrouton-recipes
+${AUTOPKG} repo-add rtrouton-recipes
 
-autopkg run AutoPkgr.install
+${AUTOPKG} run AutoPkgr.install
 
 ${LOGGER} "AutoPkgr Installed"
 echo "AutoPkgr Installed"
@@ -378,9 +379,9 @@ chown -R $ADMINUSERNAME /Users/$ADMINUSERNAME/Library/Application\ Support/AutoP
 # Install Munki Admin App by the amazing Hannes Juutilainen
 ####
 
-autopkg repo-add jleggat-recipes
+${AUTOPKG} repo-add jleggat-recipes
 
-autopkg run MunkiAdmin.install
+${AUTOPKG} run MunkiAdmin.install
 
 ####
 # Install Munki Enroll
@@ -440,17 +441,19 @@ ${MANU} add-pkg munkireport --manifest site_default
 ####
 
 # Give the owner rights to the repo again, just in case we missed something along the way...
-chmod -R a+rX,g+w "${REPONAME}" ## Thanks Arek!
-chown -R ${ADMINUSERNAME}:admin "${REPONAME}" ## Thanks Arek!
+chmod -R a+rX,g+w "${REPONAME}"
+chown -R ${ADMINUSERNAME}:admin "${REPONAME}"
 
 rm "$REPOLOC/autopkg-latest1.pkg"
 rm "$REPOLOC/munkitools2.pkg"
-rm "$REPOLOC/munkiadmin.dmg"
-rm "$REPOLOC/AutoPkgr.dmg"
 rm "$REPOLOC/munkireport-"*.pkg
 
 ${LOGGER} "I put my toys away."
 
 echo "Thank you for flying Munki in a Box Air. You now have a working repo, go forth and install your clients."
+
+echo "MunkiAdmin and AutoPkgr are ready to go, please launch them to complete their setup. MunkiAdmin needs to know where your repo is, and AutoPkgr needs to have its helper tool installed."
+
+echo "Be sure to login to MunkiReport-PHP at http://localhost/munkireport-php and initiate the database, as well change the login password."
 
 exit 0
