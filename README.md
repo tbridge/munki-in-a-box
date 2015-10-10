@@ -3,7 +3,6 @@ munki-in-a-box
 
 Post Munki Install Simple Deployment Script
 
-
 The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. I have placed defaults in these variables, but they are easily overridden and you should decide where they go.
 
 This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Pepijn Bruienne, the Linde Group and numerous others who have helped me assemble this script. The Mac Admins Community is supportive and awesome.
@@ -20,7 +19,7 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 3) Alter Line 32 to reflect your choice of AutoPKG installs  
 4) Alter Line 35 to reflect your admin username (ladmin is default)  
 5) Alter Lines 37-38 to reflect AutoPKG Automation Scripts  
-6) sudo ./munkiinabox.sh  
+6) ./munkiinabox.sh  
 
 If you do not make changes to the script before running it, the script may not run as intended. Please double-check to make sure that you are comfortable with the variables' values.
 
@@ -64,6 +63,10 @@ For more information on munkireport-php, please be sure to [visit their document
 
 
 ###Changelog
+
+**NEW in 1.4.0:**
+
+• No more running as root!
 
 **NEW in 1.3.0:**
 
