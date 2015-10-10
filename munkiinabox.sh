@@ -426,8 +426,8 @@ MR_BASEURL="https://$HOSTNAME/munkireport-php/index.php?"
 MR_DB_DIR="/var/munkireport"
 
 # Create database directory
-mkdir -p $MR_DB_DIR
-chmod +a "_www allow add_file,delete_child" $MR_DB_DIR
+sudo mkdir -p $MR_DB_DIR
+sudo chmod +a "_www allow add_file,delete_child" $MR_DB_DIR
 
 echo "<?php" > ${MR_CONFIG}
 echo >> ${MR_CONFIG}
