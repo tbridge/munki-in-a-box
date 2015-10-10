@@ -3,13 +3,13 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 1.2.1 - AutoPkgr Included!
+# Version: 1.3.0 - New MunkiReport-PHP
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
 # Approach this script like a swarm of bees: Unless you know what you are doing, keep your distance.
 
-# The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. There are default values in these variables, but they are easily overridden and you should decide where they go.
+# The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. There are default values in these variables, but they are easily overridden and you should decide what they should be.
 
 # This script is based upon the Demonstration Setup Guide for Munki, AutoPkg, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski, Elliot Jordan, The Linde Group and numerous others who have helped me assemble this script.
 
@@ -420,6 +420,10 @@ ${MANU} add-pkg munkireport --manifest site_default
 ####
 # Clean Up When Done
 ####
+
+# Give the owner rights to the repo again, just in case we missed something along the way...
+chmod -R a+rX,g+w "${REPONAME}" ## Thanks Arek!
+chown -R ${ADMINUSERNAME}:admin "${REPONAME}" ## Thanks Arek!
 
 rm "$REPOLOC/autopkg-latest1.pkg"
 rm "$REPOLOC/munkitools2.pkg"
