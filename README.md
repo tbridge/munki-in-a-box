@@ -65,6 +65,12 @@ For more information on munkireport-php, please be sure to [visit their document
 
 ###Changelog
 
+**NEW in 1.3.0:**
+
+• Updated deployment technique for Munkireport-php, thanks to A.E. von Bochoven.  
+• Additional permissions fixes thanks to Keith Mitnick  
+• Syntactical changes
+
 **NEW in 1.2.1:**
 
 • Maintenance release, with suggested fixes from Arek Dreyer, Allister Banks and others. Thanks, everyone!
