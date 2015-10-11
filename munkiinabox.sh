@@ -101,11 +101,11 @@ fi
 
 ${LOGGER} "Web service is running."
 
-#if
-#    [[ $EUID -ne 0 ]]; then
-#    $echo "This script must run as root. Type sudo $0, then press [ENTER]."
-#    exit 4 # Not running as root.
-#fi
+if
+    [[ $EUID -eq 0 ]]; then
+   $echo "This script is NOT MEANT to run as root. This script is meant to be run as an admin user. I'm going to quit now. Run me without the sudo, please."
+    exit 4 # Running as root.
+fi
 
 #${LOGGER} "Script is running as root."
 
