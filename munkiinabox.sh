@@ -41,7 +41,7 @@ SCRIPTDIR="/usr/local/bin"
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
 
-echo "First up: Are you an admin user?"
+echo "First up: Are you an admin user? Enter your password below:"
 
 #Let's see if this works...
 #This isn't bulletproof, but this is a basic test.
@@ -123,9 +123,12 @@ fi
 
 if
     [[ ! -f $MUNKILOC/munkiimport ]]; then
+    cd ${REPOLOC}
     ${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
-    curl -L "https://munkibuilds.org/munkitools2-latest.pkg" -o "$REPOLOC/munkitools2.pkg"
-
+    MUNKI_LATEST=$(curl https://api.github.com/repos/munki/munki/releases/latest | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["assets"][0]["browser_download_url"]')
+    
+    curl -L "${MUNKI_LATEST}" -o munki-latest1.pkg
+    
 # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
 
      /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
@@ -168,7 +171,7 @@ if
 </plist>
 MUNKICHOICESDONE
 
-    /usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML "/tmp/com.github.munki-in-a-box.munkiinstall.xml" -pkg "$REPOLOC/munkitools2.pkg" -target "/"
+    sudo /usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML "/tmp/com.github.munki-in-a-box.munkiinstall.xml" -pkg "munki-latest1.pkg" -target "/"
 
     ${LOGGER} "Installed Munki Admin and Munki Core packages"
     echo "Installed Munki packages"
@@ -310,14 +313,14 @@ echo "AutoPkg Installed"
 ####
 
 
-sudo ${DEFAULTS} write com.github.autopkg MUNKI_REPO "$REPODIR"
+${DEFAULTS} write com.github.autopkg MUNKI_REPO "$REPODIR"
 
 ${AUTOPKG} repo-add http://github.com/autopkg/recipes.git
 
-sudo ${DEFAULTS} write com.googlecode.munki.munkiimport editor "${TEXTEDITOR}"
-sudo ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
-sudo ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
-sudo ${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
+${DEFAULTS} write com.googlecode.munki.munkiimport editor "${TEXTEDITOR}"
+${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
+${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
+${DEFAULTS} write com.googlecode.munki.munkiimport default_catalog testing
 
 ${LOGGER} "AutoPkg Configured"
 echo "AutoPkg Configured"
@@ -433,10 +436,10 @@ echo "<?php" > ${MR_CONFIG}
 echo >> ${MR_CONFIG}
 echo "\$conf['pdo_dsn'] = 'sqlite:$MR_DB_DIR/db.sqlite';" >> ${MR_CONFIG}
 
-echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
+sudo echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
+# This creates a user "root" with password "root"
 echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> ${MR_CONFIG}
 
-# This creates a user "root" with password "root"
 # Now to download the pkgsinfo file into the right place and add it to the catalogs and site_default manifest:
 
 echo "Downloading available modules"
@@ -466,15 +469,18 @@ chmod -R a+rX,g+w "${REPONAME}"
 chown -R ${ADMINUSERNAME}:admin "${REPONAME}"
 
 rm "$REPOLOC/autopkg-latest1.pkg"
-rm "$REPOLOC/munkitools2.pkg"
+rm "$REPOLOC/munki-latest1.pkg"
 rm "$REPOLOC/munkireport-"*.pkg
 
 ${LOGGER} "I put my toys away."
 
+echo "#########"
 echo "Thank you for flying Munki in a Box Air. You now have a working repo, go forth and install your clients."
-
-echo "MunkiAdmin and AutoPkgr are ready to go, please launch them to complete their setup. MunkiAdmin needs to know where your repo is, and AutoPkgr needs to have its helper tool installed."
-
+echo "#########"
+echo "MunkiAdmin and AutoPkgr are ready to go, please launch them to complete their setup."
+echo "#########"
+echo "MunkiAdmin needs to know where your repo is, and AutoPkgr needs to have its helper tool installed."
+echo "#########"
 echo "Be sure to login to MunkiReport-PHP at http://localhost/munkireport-php and initiate the database, as well change the login password."
 
 exit 0
