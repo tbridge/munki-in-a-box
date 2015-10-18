@@ -320,7 +320,7 @@ ${AUTOPKG} repo-add rtrouton-recipes
 ${AUTOPKG} repo-add jleggat-recipes
 ${AUTOPKG} repo-add timsutton-recipes
 ${AUTOPKG} repo-add nmcspadden-recipes
-${AUTOPKG} repo-add jesspeterson-recipes
+${AUTOPKG} repo-add jessepeterson-recipes
 
 ${DEFAULTS} write com.googlecode.munki.munkiimport editor "${TEXTEDITOR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
