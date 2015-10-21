@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 1.3.0 - New MunkiReport-PHP
+# Version: 1.4.0 - Non-Root Execution
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
@@ -13,7 +13,7 @@
 
 # This script is based upon the Demonstration Setup Guide for Munki, AutoPkg, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski, Elliot Jordan, The Linde Group and numerous others who have helped me assemble this script.
 
-# Pre-Reqs for this script: 10.8/Server 2, 10.9/Server 3 or 10.10/Server 4.  Web Services should be turned on and PHP should be enabled.
+# Pre-Reqs for this script: 10.10/Server 4 or 10.11/Server 5.  Web Services should be turned on and PHP should be enabled. This script might work with 10.8 or later, but I'm only testing it on 10.10 or later.
 
 # Establish our Basic Variables:
 
@@ -40,6 +40,20 @@ SCRIPTDIR="/usr/local/bin"
 #AUTOPKGORGNAME="com.technolutionary"
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
+
+echo "First up: Are you an admin user? Enter your password below:"
+
+#Let's see if this works...
+#This isn't bulletproof, but this is a basic test.
+sudo whoami > /tmp/quickytest
+
+if
+	[[  `cat /tmp/quickytest` == "root" ]]; then
+	${LOGGER} "Privilege Escalation Allowed, Please Continue."
+	else
+	${LOGGER} "Privilege Escalation Denied, User Cannot Sudo."
+	exit 6 "You are not an admin user, you need to do this an admin user."
+fi
 
 ${LOGGER} "Starting up..."
 
@@ -69,6 +83,13 @@ if
     exit 2 # 10.8+ for the Web Root Location.
 fi
 
+if
+    [[ $osvers -lt 10 ]]; then
+    	echo "##################################################"
+    	echo "This script is intended for OS X 10.10 or later. It may work on 10.8 or 10.9, but the ride may be a bit bumpy, and things may not go quite the way the script intended them to go. In short, this is not supported, but it probably won't light anything on fire. Be aware."
+	echo "##################################################"
+fi
+
 ${LOGGER} "Mac OS X 10.8 or later is installed."
 
 if
@@ -81,12 +102,12 @@ fi
 ${LOGGER} "Web service is running."
 
 if
-    [[ $EUID -ne 0 ]]; then
-    $echo "This script must run as root. Type sudo $0, then press [ENTER]."
-    exit 4 # Not running as root.
+    [[ $EUID -eq 0 ]]; then
+   $echo "This script is NOT MEANT to run as root. This script is meant to be run as an admin user. I'm going to quit now. Run me without the sudo, please."
+    exit 4 # Running as root.
 fi
 
-${LOGGER} "Script is running as root."
+#${LOGGER} "Script is running as root."
 
 if
     [[ ! -d "${WEBROOT}" ]]; then
@@ -102,9 +123,12 @@ fi
 
 if
     [[ ! -f $MUNKILOC/munkiimport ]]; then
+    cd ${REPOLOC}
     ${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
-    curl -L "https://munkibuilds.org/munkitools2-latest.pkg" -o "$REPOLOC/munkitools2.pkg"
-
+    MUNKI_LATEST=$(curl https://api.github.com/repos/munki/munki/releases/latest | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["assets"][0]["browser_download_url"]')
+    
+    curl -L "${MUNKI_LATEST}" -o munki-latest1.pkg
+    
 # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
 
      /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
@@ -147,7 +171,7 @@ if
 </plist>
 MUNKICHOICESDONE
 
-    /usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML "/tmp/com.github.munki-in-a-box.munkiinstall.xml" -pkg "$REPOLOC/munkitools2.pkg" -target "/"
+    sudo /usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML "/tmp/com.github.munki-in-a-box.munkiinstall.xml" -pkg "munki-latest1.pkg" -target "/"
 
     ${LOGGER} "Installed Munki Admin and Munki Core packages"
     echo "Installed Munki packages"
@@ -188,7 +212,7 @@ cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in
 	
 	#Install the command line tools
 	
-	softwareupdate -i "$cmd_line_tools" -v
+	sudo softwareupdate -i "$cmd_line_tools" -v
 	
 	# Remove the temp file
 	
@@ -217,7 +241,7 @@ cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in
 		curl "$DMGURL" -o "$TOOLS"
 		TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
 		hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
-		installer -allowUntrusted -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
+		sudo installer -allowUntrusted -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
 		hdiutil detach "$TMPMOUNT"
 		rm -rf "$TMPMOUNT"
 		rm "$TOOLS"
@@ -279,7 +303,7 @@ echo "Client install pkg is created. It's in the base of the repo."
 AUTOPKG_LATEST=$(curl https://api.github.com/repos/autopkg/autopkg/releases | python -c 'import json,sys;obj=json.load(sys.stdin);print obj[0]["assets"][0]["browser_download_url"]')
 curl -L "${AUTOPKG_LATEST}" -o autopkg-latest1.pkg
 
-installer -pkg autopkg-latest1.pkg -target /
+sudo installer -pkg autopkg-latest1.pkg -target /
 
 ${LOGGER} "AutoPkg Installed"
 echo "AutoPkg Installed"
@@ -292,6 +316,11 @@ echo "AutoPkg Installed"
 ${DEFAULTS} write com.github.autopkg MUNKI_REPO "$REPODIR"
 
 ${AUTOPKG} repo-add http://github.com/autopkg/recipes.git
+${AUTOPKG} repo-add rtrouton-recipes
+${AUTOPKG} repo-add jleggat-recipes
+${AUTOPKG} repo-add timsutton-recipes
+${AUTOPKG} repo-add nmcspadden-recipes
+${AUTOPKG} repo-add jessepeterson-recipes
 
 ${DEFAULTS} write com.googlecode.munki.munkiimport editor "${TEXTEDITOR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
@@ -303,10 +332,10 @@ echo "AutoPkg Configured"
 
 # This makes AutoPkg useful on future runs for the admin user defined at the top. It copies & creates preferences for autopkg and munki into their home dir's Library folder, as well as transfers ownership for the ~/Library/AutoPkg folders to them.
 
-cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Library/Preferences
-cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences
-chmod 660 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
-chmod 660 ~/Library/Preferences/com.github.autopkg.plist
+#cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Library/Preferences
+#cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences
+#chmod 660 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
+#chmod 660 ~/Library/Preferences/com.github.autopkg.plist
 
 plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
 
@@ -320,8 +349,8 @@ ${LOGGER} "AutoPkg Run"
 echo "AutoPkg has run"
 
 # Bring it on home to the all-powerful, all-wise, local admin... (Thanks Luis)
-
-chown -R ${ADMINUSERNAME} ~/Library/AutoPkg
+# To be deleted if this rootless thing works.
+# chown -R ${ADMINUSERNAME} ~/Library/AutoPkg
 
 ####
 # Create new site_default manifest and add imported packages to it
@@ -352,8 +381,6 @@ done
 # Install AutoPkgr from the awesome Linde Group!
 ####
 
-${AUTOPKG} repo-add rtrouton-recipes
-
 ${AUTOPKG} run AutoPkgr.install
 
 ${LOGGER} "AutoPkgr Installed"
@@ -373,7 +400,7 @@ com.github.autopkg.munki.textwrangler
 com.github.autopkg.munki.munkitools2
 com.github.autopkg.munki.makecatalogs" > /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr/recipe_list.txt
 
-chown -R $ADMINUSERNAME /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
+# chown -R $ADMINUSERNAME /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
 
 ####
 # Install Munki Admin App by the amazing Hannes Juutilainen
@@ -405,17 +432,17 @@ MR_BASEURL="https://$HOSTNAME/munkireport-php/index.php?"
 MR_DB_DIR="/var/munkireport"
 
 # Create database directory
-mkdir -p $MR_DB_DIR
-chmod +a "_www allow add_file,delete_child" $MR_DB_DIR
+sudo mkdir -p $MR_DB_DIR
+sudo chmod +a "_www allow add_file,delete_child" $MR_DB_DIR
 
 echo "<?php" > ${MR_CONFIG}
 echo >> ${MR_CONFIG}
 echo "\$conf['pdo_dsn'] = 'sqlite:$MR_DB_DIR/db.sqlite';" >> ${MR_CONFIG}
 
-echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
+sudo echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
+# This creates a user "root" with password "root"
 echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> ${MR_CONFIG}
 
-# This creates a user "root" with password "root"
 # Now to download the pkgsinfo file into the right place and add it to the catalogs and site_default manifest:
 
 echo "Downloading available modules"
@@ -445,15 +472,18 @@ chmod -R a+rX,g+w "${REPONAME}"
 chown -R ${ADMINUSERNAME}:admin "${REPONAME}"
 
 rm "$REPOLOC/autopkg-latest1.pkg"
-rm "$REPOLOC/munkitools2.pkg"
+rm "$REPOLOC/munki-latest1.pkg"
 rm "$REPOLOC/munkireport-"*.pkg
 
 ${LOGGER} "I put my toys away."
 
+echo "#########"
 echo "Thank you for flying Munki in a Box Air. You now have a working repo, go forth and install your clients."
-
-echo "MunkiAdmin and AutoPkgr are ready to go, please launch them to complete their setup. MunkiAdmin needs to know where your repo is, and AutoPkgr needs to have its helper tool installed."
-
+echo "#########"
+echo "MunkiAdmin and AutoPkgr are ready to go, please launch them to complete their setup."
+echo "#########"
+echo "MunkiAdmin needs to know where your repo is, and AutoPkgr needs to have its helper tool installed."
+echo "#########"
 echo "Be sure to login to MunkiReport-PHP at http://localhost/munkireport-php and initiate the database, as well change the login password."
 
 exit 0
