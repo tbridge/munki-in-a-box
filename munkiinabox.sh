@@ -150,9 +150,9 @@ if [[ -e "/Applications/Server.app/Contents/ServerRoot/usr/sbin/server" ]]; then
 
   # Accept the Server.app license and set up the server tools
 
-/usr/bin/expect<<EOF
+sudo /usr/bin/expect<<EOF
 set timeout 300
-sudo spawn /Applications/Server.app/Contents/ServerRoot/usr/sbin/server setup
+spawn /Applications/Server.app/Contents/ServerRoot/usr/sbin/server setup
 puts "$serverdotapp_setupadmin"
 puts "$serverdotapp_setupadmin_password"
 expect "Press Return to view the software license agreement." { send \r }
@@ -167,10 +167,11 @@ EOF
 
 fi
 
+sleep 300 # I dunno how long I need to wait, but I apparently need to wait SOME period of time.
 
 #### End Rich's Script.
 
-WEBSTATUS=$(sudo serveradmin status web | awk '{print $3}') # Thanks Charles Edge
+WEBSTATUS=$(sudo serveradmin status web | awk '{print $3}') 
 WEBAPPSTATUS=$(sudo webappctl status - | awk '{print $3}')
 
 
