@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 1.4.0 - Non-Root Execution
+# Version: 1.5.0 - Let's setup Server.app, too.
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
@@ -28,20 +28,40 @@ GIT="/usr/bin/git"
 MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
-webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
+WEBSTATUS=$(sudo serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools2.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 AUTOPKG="/usr/local/bin/autopkg"
 MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
 SCRIPTDIR="/usr/local/bin"
+HOSTNAME="test.technolutionary.com" # You'll definitely want to make sure this is set to something other than the default.
+WEBAPPSTATUS=$(sudo webappctl status - | awk '{print $3}')
+SERVERPKGLOC="https://dl.dropboxusercontent.com/u/780505/server.pkg"
+
+
 ## Below are for Sean Kaiser's Scripts. Uncomment to Use.
 #AUTOPKGEMAIL="youraddress@domain.com"
 #AUTOPKGORGNAME="com.technolutionary"
 
+# Make sure the whole script stops if Control-C is pressed.
+fn_terminate() {
+    fn_log_error "Munki-in-a-Box has been terminated."
+    exit 1
+}
+trap 'fn_terminate' SIGINT
+
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
 
+if
+    [[ $EUID -eq 0 ]]; then
+   $echo "This script is NOT MEANT to run as root. This script is meant to be run as an admin user. I'm going to quit now. Run me without the sudo, please."
+    exit 4 # Running as root.
+fi
+
 echo "First up: Are you an admin user? Enter your password below:"
+
+
 
 #Let's see if this works...
 #This isn't bulletproof, but this is a basic test.
@@ -55,11 +75,126 @@ if
 	exit 6 "You are not an admin user, you need to do this an admin user."
 fi
 
-${LOGGER} "Starting up..."
+if
+    [[ $osvers -lt 10 ]]; then
+    ${LOGGER} "Could not run because the version of the OS does not meet requirements"
+    echo "Sorry, this is for Mac OS 10.10 or later."
+    exit 2 # 10.8+ for the Web Root Location.
+fi
 
-echo "$webstatus"
+${LOGGER} "Mac OS X 10.10 or later is installed."
 
-${LOGGER} "Webstatus echoed."
+#### We're going to now set the hostname ahead of Server.app setup & initialization
+
+sudo scutil --set HostName ${HOSTNAME}
+
+#### This section was written by Rich Trouton and published on Der Flounder for use by skilled admins everywhere. It comes with no warranty, and if it breaks, you own both pieces.
+
+if [[ ! -e "/Applications/Server.app/Contents/ServerRoot/usr/sbin/server" ]]; then
+  echo "Server.app is not available. Commencing Fetch & Install."
+  curl ${SERVERPKGLOC} -o /tmp/server.pkg
+  sudo /usr/sbin/installer -dumplog -verbose -pkg "/tmp/server.pkg" -target "/"
+fi
+
+# If the 'server' setup tool is located, script will proceed and run
+# the initial setup and configuration of OS X Server's services. 
+
+if [[ -e "/Applications/Server.app/Contents/ServerRoot/usr/sbin/server" ]]; then
+
+  serverdotapp_username=serverdotappuser
+  serverdotapp_password=$(openssl rand -base64 32)
+  serverdotapp_user_name="Server App User"
+  serverdotapp_user_hint="No hint for you!"
+  serverdotapp_user_shell=/usr/bin/false
+  serverdotapp_user_group=20
+  serverdotapp_user_image="/Library/User Pictures/Fun/Chalk.tif"
+
+ create_temp_user() {
+  
+    # Generate UID for user by identifying the numerically highest UID
+    # currently in use on this machine then setting the "userUID" value
+    # to be one number higher.
+    
+    maxUID=$(sudo /usr/bin/dscl . list /Users UniqueID | awk '{print $2}' | sort -ug | tail -1)
+    userUID=$((maxUID+1))
+  
+	sudo /usr/bin/dscl . create /Users/${serverdotapp_username}
+	sudo /usr/bin/dscl . passwd /Users/${serverdotapp_username} ${serverdotapp_password}
+	sudo /usr/bin/dscl . create /Users/${serverdotapp_username} UserShell ${serverdotapp_user_shell}
+	sudo /usr/bin/dscl . create /Users/${serverdotapp_username} UniqueID "$userUID"
+	sudo /usr/bin/dscl . create /Users/${serverdotapp_username} PrimaryGroupID ${serverdotapp_user_group}
+	sudo /usr/bin/dscl . create /Users/${serverdotapp_username} RealName "${serverdotapp_user_name}"
+	sudo /usr/bin/dscl . create /Users/${serverdotapp_username} Picture "${serverdotapp_user_image}"
+	sudo /usr/bin/dscl . create /Users/${serverdotapp_username} Hint "${serverdotapp_user_hint}"
+  }
+
+   promote_temp_user_to_admin() {
+	sudo /usr/sbin/dseditgroup -o edit -a $serverdotapp_username -t user admin
+  }
+
+   delete_temp_user() {
+	sudo /usr/bin/dscl . delete /Users/${serverdotapp_username}
+  }
+
+  # Create temporary user to authorize Server setup
+  # and give admin rights to that temporary user
+  
+   create_temp_user
+   promote_temp_user_to_admin
+  
+  # Export temporary user's username and password as environment values.
+  # This export will allow these values to be used by the expect section
+  
+   export serverdotapp_setupadmin="$serverdotapp_username"
+   export serverdotapp_setupadmin_password="$serverdotapp_password"
+
+  # Accept the Server.app license and set up the server tools
+
+/usr/bin/expect<<EOF
+set timeout 300
+sudo spawn /Applications/Server.app/Contents/ServerRoot/usr/sbin/server setup
+puts "$serverdotapp_setupadmin"
+puts "$serverdotapp_setupadmin_password"
+expect "Press Return to view the software license agreement." { send \r }
+expect "Do you agree to the terms of the software license agreement? (y/N)" { send "y\r" }
+expect "User name:" { send "$serverdotapp_setupadmin\r" }
+expect "Password:" { send "$serverdotapp_setupadmin_password\r" }
+expect "%"
+EOF
+
+  # Delete temporary user
+  delete_temp_user
+
+fi
+
+
+#### End Rich's Script.
+
+
+#### Now let's fire up web services...
+
+if ${WEBAPPSTATUS} == _empty_array && ${WEBSTATUS} == "STOPPED"; then
+
+	sudo serveradmin start web
+	sudo webappctl start com.apple.web.php
+
+elif ${WEBAPPSTATUS} == _empty_array && ${WEBSTATUS} == "RUNNING"; then
+
+	sudo webappctl start com.apple.web.php
+	
+else 
+
+	sudo webappctl stop com.apple.web.php
+	sudo serveradmin stop web
+	
+	sudo serveradmin start web
+	sudo webappctl start com.apple.web.php
+
+fi
+
+
+
+${LOGGER} "Starting trench run..."
 
 ####
 
@@ -69,50 +204,10 @@ ${LOGGER} "Webstatus echoed."
 
 ${LOGGER} "Starting checks..."
 
-# Make sure the whole script stops if Control-C is pressed.
-fn_terminate() {
-    fn_log_error "Munki-in-a-Box has been terminated."
-    exit 1
-}
-trap 'fn_terminate' SIGINT
-
-if
-    [[ $osvers -lt 8 ]]; then
-    ${LOGGER} "Could not run because the version of the OS does not meet requirements"
-    echo "Sorry, this is for Mac OS 10.8 or later."
-    exit 2 # 10.8+ for the Web Root Location.
-fi
-
-if
-    [[ $osvers -lt 10 ]]; then
-    	echo "##################################################"
-    	echo "This script is intended for OS X 10.10 or later. It may work on 10.8 or 10.9, but the ride may be a bit bumpy, and things may not go quite the way the script intended them to go. In short, this is not supported, but it probably won't light anything on fire. Be aware."
-	echo "##################################################"
-fi
-
-${LOGGER} "Mac OS X 10.8 or later is installed."
-
-if
-    [[ $webstatus == *STOPPED* ]]; then
-    ${LOGGER} "Could not run because the Web Service is stopped"
-    echo "Please turn on Web Services in Server.app"
-    exit 3 # Sorry, turn on the webserver.
-fi
-
-${LOGGER} "Web service is running."
-
-if
-    [[ $EUID -eq 0 ]]; then
-   $echo "This script is NOT MEANT to run as root. This script is meant to be run as an admin user. I'm going to quit now. Run me without the sudo, please."
-    exit 4 # Running as root.
-fi
-
-#${LOGGER} "Script is running as root."
-
 if
     [[ ! -d "${WEBROOT}" ]]; then
     echo "No web root exists at ${WEBROOT}. This might be because you don't have Server.app installed and configured."
-    exit 5 # Web Root folder doesn't exist.
+    exit 5 # Web Root folder doesn't exist or is incorrect.
 fi
 
 # If we pass this point, the Repo gets linked:
@@ -474,6 +569,7 @@ chown -R ${ADMINUSERNAME}:admin "${REPONAME}"
 rm "$REPOLOC/autopkg-latest1.pkg"
 rm "$REPOLOC/munki-latest1.pkg"
 rm "$REPOLOC/munkireport-"*.pkg
+rm /tmp/server.pkg
 
 ${LOGGER} "I put my toys away."
 
