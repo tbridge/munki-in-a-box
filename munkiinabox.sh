@@ -88,12 +88,19 @@ ${LOGGER} "Mac OS X 10.10 or later is installed."
 
 sudo scutil --set HostName ${HOSTNAME}
 
-#### This section was written by Rich Trouton and published on Der Flounder for use by skilled admins everywhere. It comes with no warranty, and if it breaks, you own both pieces.
+#### This section was written by Rich Trouton and Charles Edge and published on Der Flounder and Krypted for use by skilled admins everywhere. It comes with no warranty, and if it breaks, you own both pieces.
 
 if [[ ! -e "/Applications/Server.app/Contents/ServerRoot/usr/sbin/server" ]]; then
   echo "Server.app is not available. Commencing Fetch & Install."
   curl ${SERVERPKGLOC} -o /tmp/server.pkg
   sudo /usr/sbin/installer -dumplog -verbose -pkg "/tmp/server.pkg" -target "/"
+fi
+
+if [[ ! -e "/Library/PrivilegedHelperTools/com.apple.serverd" ]]; then
+
+	# Move the helper tools over.
+	/usr/bin/ditto /Applications/Server.app/Contents/Library/LaunchServices/com.apple.serverd /Library/PrivilegedHelperTools/com.apple.serverd
+
 fi
 
 # If the 'server' setup tool is located, script will proceed and run
@@ -167,9 +174,8 @@ EOF
 
 fi
 
-sleep 300 # I dunno how long I need to wait, but I apparently need to wait SOME period of time.
 
-#### End Rich's Script.
+#### End Server Config Script.
 
 WEBSTATUS=$(sudo serveradmin status web | awk '{print $3}') 
 WEBAPPSTATUS=$(sudo webappctl status - | awk '{print $3}')
