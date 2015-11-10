@@ -28,7 +28,6 @@ GIT="/usr/bin/git"
 MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
-WEBSTATUS=$(sudo serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools2.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 AUTOPKG="/usr/local/bin/autopkg"
@@ -36,8 +35,7 @@ MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
 SCRIPTDIR="/usr/local/bin"
 HOSTNAME="test.technolutionary.com" # You'll definitely want to make sure this is set to something other than the default.
-WEBAPPSTATUS=$(sudo webappctl status - | awk '{print $3}')
-SERVERPKGLOC="https://dl.dropboxusercontent.com/u/780505/server.pkg"
+SERVERPKGLOC="http://path/to/server.pkg"
 
 
 ## Below are for Sean Kaiser's Scripts. Uncomment to Use.
@@ -85,6 +83,8 @@ fi
 ${LOGGER} "Mac OS X 10.10 or later is installed."
 
 #### We're going to now set the hostname ahead of Server.app setup & initialization
+
+
 
 sudo scutil --set HostName ${HOSTNAME}
 
@@ -169,6 +169,9 @@ fi
 
 
 #### End Rich's Script.
+
+WEBSTATUS=$(sudo serveradmin status web | awk '{print $3}') # Thanks Charles Edge
+WEBAPPSTATUS=$(sudo webappctl status - | awk '{print $3}')
 
 
 #### Now let's fire up web services...
