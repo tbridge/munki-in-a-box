@@ -99,7 +99,7 @@ fi
 if [[ ! -e "/Library/PrivilegedHelperTools/com.apple.serverd" ]]; then
 
 	# Move the helper tools over.
-	/usr/bin/ditto /Applications/Server.app/Contents/Library/LaunchServices/com.apple.serverd /Library/PrivilegedHelperTools/com.apple.serverd
+	sudo cp /Applications/Server.app/Contents/Library/LaunchServices/com.apple.serverd /Library/PrivilegedHelperTools/
 
 fi
 
@@ -174,34 +174,7 @@ EOF
 
 fi
 
-
-#### End Server Config Script.
-
-WEBSTATUS=$(sudo serveradmin status web | awk '{print $3}') 
-WEBAPPSTATUS=$(sudo webappctl status - | awk '{print $3}')
-
-
-#### Now let's fire up web services...
-
-if ${WEBAPPSTATUS} == _empty_array && ${WEBSTATUS} == "STOPPED"; then
-
-	sudo serveradmin start web
-	sudo webappctl start com.apple.web.php
-
-elif ${WEBAPPSTATUS} == _empty_array && ${WEBSTATUS} == "RUNNING"; then
-
-	sudo webappctl start com.apple.web.php
-	
-else 
-
-	sudo webappctl stop com.apple.web.php
-	sudo serveradmin stop web
-	
-	sudo serveradmin start web
-	sudo webappctl start com.apple.web.php
-
-fi
-
+sleep 15
 
 
 ${LOGGER} "Starting trench run..."
@@ -527,6 +500,34 @@ mv munki-enroll-host/Scripts/munki_enroll.sh munki-enroll
 sed -i.orig "s|/munki/|/${HOSTNAME}/|" munki-enroll/munki_enroll.sh
 
 ####
+#	Web Checks Before MR-PHP
+####
+
+#### End Server Config Script.
+
+WEBSTATUS=$(sudo serveradmin status web | awk '{print $3}') 
+WEBAPPSTATUS=$(sudo webappctl status - | awk '{print $3}')
+
+
+#### Now let's fire up web services...
+
+if [[ ${WEBAPPSTATUS} == _empty_array ]] ; then
+
+	if [[ ${WEBSTATUS} == "STOPPED" ]]; then
+	
+		sudo serveradmin start web
+		sudo webappctl start com.apple.webapp.php
+	
+	else 
+	
+	sudo serveradmin start web
+	sudo webappctl start com.apple.webapp.php
+
+	fi
+
+fi
+
+####
 #  Install MunkiReport-PHP
 ####
 
@@ -544,7 +545,7 @@ echo "<?php" > ${MR_CONFIG}
 echo >> ${MR_CONFIG}
 echo "\$conf['pdo_dsn'] = 'sqlite:$MR_DB_DIR/db.sqlite';" >> ${MR_CONFIG}
 
-sudo echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
+# sudo echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
 # This creates a user "root" with password "root"
 echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> ${MR_CONFIG}
 

@@ -9,19 +9,18 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 ###Pre-Requisites:
 
-1) 10.8/Server 2, 10.9/Server 3, 10.10/Server 4 , 10.11/Server 5
-2) Web Services Enabled
+1) Mac OS X 10.10.5 or later
 
 ###Directions for Use:
 
 1) Download Script  
 2) Alter Lines 20-21 to reflect your choice for munki repo name and location  
-3) Alter Line 32 to reflect your choice of AutoPKG installs  
+3) Alter Line 31 to reflect your choice of AutoPKG installs  
 4) Alter Line 35 to reflect your admin username (ladmin is default)  
-5) Alter Lines 37-38 to reflect AutoPKG Automation Scripts  
+5) Alter Lines 37-38 to reflect your desired hostname and the location of your copy of the Server.app Installation Package.
 6) ./munkiinabox.sh  
 
-If you do not make changes to the script before running it, the script may not run as intended. Please double-check to make sure that you are comfortable with the variables' values.
+*If you do not make changes to the script before running it, the script may not run as intended.* Please double-check to make sure that you are comfortable with the variables' values.
 
 ##Caveats: 
 
@@ -63,6 +62,11 @@ For more information on munkireport-php, please be sure to [visit their document
 
 
 ###Changelog
+
+**NEW in 1.5.0 Beta 1:**
+
+• This version is designed to install Server.app if you haven't already, as well as configure it _from the command line_ automagically. Please double check to make sure your DNS is good before running the script. Please report issues if you see them.  
+• Please note that `server setup` will report an Unknown Error on completion. It still runs okay, so I'm not sure why we're getting that. I'll be filing a bug.
 
 **NEW in 1.4.0:**
 
