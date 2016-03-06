@@ -9,7 +9,7 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 ###Pre-Requisites:
 
-1) 10.8/Server 2, 10.9/Server 3, 10.10/Server 4 , 10.11/Server 5
+1) 10.10/Server 4 , 10.11/Server 5
 2) Web Services Enabled
 
 ###Directions for Use:
@@ -17,11 +17,12 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 1) Download Script  
 2) Alter Lines 20-21 to reflect your choice for munki repo name and location  
 3) Alter Line 32 to reflect your choice of AutoPKG installs  
-4) Alter Line 35 to reflect your admin username (ladmin is default)  
-5) Alter Lines 37-38 to reflect AutoPKG Automation Scripts  
+4) Alter Line 36 to reflect your admin username (ladmin is default)  
+5) Alter Line 38 to reflect your preferred HTTP Basic Authorization password
 6) ./munkiinabox.sh  
+7) Enable the "Allow overrides using .htaccess files" option in Server.app > Web > SSL Website > Edit Advanced Settings
 
-If you do not make changes to the script before running it, the script may not run as intended. Please double-check to make sure that you are comfortable with the variables' values.
+If you do not make changes to the script before running it, the script may not run as intended. *Please double-check to make sure that you are comfortable with the variables' values.*
 
 ##Caveats: 
 
@@ -63,6 +64,11 @@ For more information on munkireport-php, please be sure to [visit their document
 
 
 ###Changelog
+
+**New in 1.5.0:**
+
+• SSL Basic Authentication is now included by default. This will require a trusted certificate already in place on your Server, otherwise, you will need to add a second package with your certificate and a script to have it trusted by the System.keychain.  
+• Trimmed extraneous lines  
 
 **NEW in 1.4.0:**
 

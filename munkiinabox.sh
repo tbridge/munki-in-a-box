@@ -272,17 +272,19 @@ echo "Repo Created"
 ####
 
 /bin/cat > "${REPONAME}/.htaccess" << 'HTPASSWDDONE'
-
 AuthType Basic
 AuthName "Munki Repository"
-AuthUserFile ${REPONAME}/.htpasswd
+AuthUserFile /Library/Server/Web/Data/Sites/Default/munki_repo/.htpasswd
 Require valid-user
 HTPASSWDDONE
 
-htpasswd -b .htpasswd munki $HTPASSWD
+cd ${REPONAME}
+
+htpasswd -cb .htpasswd munki $HTPASSWD
 HTPASSAUTH=$(python -c 'import base64; print "Authorization: Basic %s" % base64.b64encode("munki:$HTPASSWD")')
 
-chmod 600 .htaccess .htpasswd
+sudo chmod 640 .htaccess .htpasswd
+sudo chown _www:wheel .htaccess .htpasswd
 
 ####
 # Create a client installer pkg pointing to this repo. Thanks Nick!
@@ -298,9 +300,7 @@ fi
 mkdir -p /tmp/ClientInstaller/Library/Preferences/
 
 HOSTNAME=$(/bin/hostname)
-${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist SoftwareRepoURL "http://$HOSTNAME/${REPONAME}"
-${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist
-AdditionalHttpHeaders -array $HTPASSAUTH
+${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls SoftwareRepoURL "https://$HOSTNAME/${REPONAME}" && ${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls AdditionalHttpHeaders -array "$HTPASSAUTH"
 
 /usr/bin/pkgbuild --identifier com.munkiinabox.client.pkg --root /tmp/ClientInstaller ClientInstaller.pkg
 
@@ -344,11 +344,6 @@ ${LOGGER} "AutoPkg Configured"
 echo "AutoPkg Configured"
 
 # This makes AutoPkg useful on future runs for the admin user defined at the top. It copies & creates preferences for autopkg and munki into their home dir's Library folder, as well as transfers ownership for the ~/Library/AutoPkg folders to them.
-
-#cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Library/Preferences
-#cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences
-#chmod 660 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
-#chmod 660 ~/Library/Preferences/com.github.autopkg.plist
 
 plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
 
@@ -452,7 +447,6 @@ echo "<?php" > ${MR_CONFIG}
 echo >> ${MR_CONFIG}
 echo "\$conf['pdo_dsn'] = 'sqlite:$MR_DB_DIR/db.sqlite';" >> ${MR_CONFIG}
 
-sudo echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
 # This creates a user "root" with password "root"
 echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> ${MR_CONFIG}
 
