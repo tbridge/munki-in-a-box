@@ -9,8 +9,8 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 
 ###Pre-Requisites:
 
-1) 10.8/Server 2, 10.9/Server 3, 10.10/Server 4 , 10.11/Server 5
-2) Web Services Enabled
+1) One of the following: 10.8/Server 2.x, 10.9/Server 3.x, 10.10/Server 4.x, or 10.11/Server 5.x
+2) Web services enabled
 
 ###Directions for Use:
 
@@ -35,7 +35,7 @@ When you setup AutoPkgr, be sure to understand the security implications of givi
 
 ##MunkiAdmin
 
-[MunkiAdmin](http://hjuutilainen.github.io/munkiadmin/) is Hannes Juutilainen's native GUI application for managing Munki repositories. It is super handy for those who prefer graphical interfaces to their inscrutable XML files.  It is installed in the /Application/Utilities directory.
+[MunkiAdmin](http://hjuutilainen.github.io/munkiadmin/) is Hannes Juutilainen's native GUI application for managing Munki repositories. It is super handy for those who prefer graphical interfaces to their inscrutable XML files.  It is installed in the /Applications/Utilities directory.
 
 ##AutoPkg
 
@@ -43,7 +43,7 @@ When you setup AutoPkgr, be sure to understand the security implications of givi
 
 ##AutoPkgr
 
-[AutoPkgr](http://www.lindegroup.com/autopkgr) is The Linde Group's native GUI application used for managing AutoPkg's command line functionality. Specifically, you can configure it to periodically check for new updates, import those into your Munki repository, then email you about what new versions have been imported for testing. It is installed in the /Application/Utilities directory.
+[AutoPkgr](http://www.lindegroup.com/autopkgr) is the Linde Group's native GUI application used for managing AutoPkg's command line functionality. Specifically, you can configure it to periodically check for new updates, import those into your Munki repository, then email you about what new versions have been imported for testing. It is installed in the /Applications/Utilities directory.
 
 ##Munkireport-php
 
