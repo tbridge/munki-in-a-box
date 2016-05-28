@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 1.4.0 - Non-Root Execution
+# Version: Special Branch 1.0
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
@@ -13,7 +13,7 @@
 
 # This script is based upon the Demonstration Setup Guide for Munki, AutoPkg, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski, Elliot Jordan, The Linde Group and numerous others who have helped me assemble this script.
 
-# Pre-Reqs for this script: 10.10/Server 4 or 10.11/Server 5.  Web Services should be turned on and PHP should be enabled. This script might work with 10.8 or later, but I'm only testing it on 10.10 or later.
+# Pre-Reqs for this script: 10.10/Server 4 or 10.11/Server 5.  Web Services should be turned on and PHP should be enabled. 
 
 # Establish our Basic Variables:
 
@@ -29,15 +29,12 @@ MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
-AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools2.munki MakeCatalogs.munki"
+AUTOPKGRUN="Firefox.munki GoogleChrome.munki MakeCatalogs.munki"
 DEFAULTS="/usr/bin/defaults"
 AUTOPKG="/usr/local/bin/autopkg"
 MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
 SCRIPTDIR="/usr/local/bin"
-## Below are for Sean Kaiser's Scripts. Uncomment to Use.
-#AUTOPKGEMAIL="youraddress@domain.com"
-#AUTOPKGORGNAME="com.technolutionary"
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
 
@@ -77,20 +74,13 @@ fn_terminate() {
 trap 'fn_terminate' SIGINT
 
 if
-    [[ $osvers -lt 8 ]]; then
+    [[ $osvers -lt 10 ]]; then
     ${LOGGER} "Could not run because the version of the OS does not meet requirements"
-    echo "Sorry, this is for Mac OS 10.8 or later."
+    echo "Sorry, this is for Mac OS 10.10 or later."
     exit 2 # 10.8+ for the Web Root Location.
 fi
 
-if
-    [[ $osvers -lt 10 ]]; then
-    	echo "##################################################"
-    	echo "This script is intended for OS X 10.10 or later. It may work on 10.8 or 10.9, but the ride may be a bit bumpy, and things may not go quite the way the script intended them to go. In short, this is not supported, but it probably won't light anything on fire. Be aware."
-	echo "##################################################"
-fi
-
-${LOGGER} "Mac OS X 10.8 or later is installed."
+${LOGGER} "Mac OS X 10.10 or later is installed."
 
 if
     [[ $webstatus == *STOPPED* ]]; then
@@ -192,14 +182,14 @@ if
 # This section written by Rich Trouton and embedded because he's awesome. Diet Coke++, Rich.
 ###
 
-# Installing the Xcode command line tools on 10.7.x through 10.10.x
+# Installing the Xcode command line tools on 10.10.x and later
  
 osx_vers=$(sw_vers -productVersion | awk -F "." '{print $2}')
 cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
  
 # Installing the latest Xcode command line tools on 10.9.x or 10.10.x
  
-	if [[ "$osx_vers" -ge 9 ]] ; then
+	if [[ "$osx_vers" -ge 10 ]] ; then
  
 	# Create the placeholder file which is checked by the softwareupdate tool 
 	# before allowing the installation of the Xcode command line tools.
@@ -221,33 +211,6 @@ cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in
 		fi
 	fi
  
-# Installing the latest Xcode command line tools on 10.7.x and 10.8.x
- 
-# on 10.7/10.8, instead of using the software update feed, the command line tools are downloaded
-# instead from public download URLs, which can be found in the dvtdownloadableindex:
-# https://devimages.apple.com.edgekey.net/downloads/xcode/simulators/index-3905972D-B609-49CE-8D06-51ADC78E07BC.dvtdownloadableindex
- 
-	if [[ "$osx_vers" -eq 7 ]] || [[ "$osx_vers" -eq 8 ]]; then
- 
-		if [[ "$osx_vers" -eq 7 ]]; then
-	    DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg
-		fi
-	
-		if [[ "$osx_vers" -eq 8 ]]; then
-	     DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2014.dmg
-		fi
- 
-		TOOLS=clitools.dmg
-		curl "$DMGURL" -o "$TOOLS"
-		TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
-		hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
-		sudo installer -allowUntrusted -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
-		hdiutil detach "$TMPMOUNT"
-		rm -rf "$TMPMOUNT"
-		rm "$TOOLS"
-
-	fi
-
 fi
 
 ###
@@ -316,11 +279,6 @@ echo "AutoPkg Installed"
 ${DEFAULTS} write com.github.autopkg MUNKI_REPO "$REPODIR"
 
 ${AUTOPKG} repo-add http://github.com/autopkg/recipes.git
-${AUTOPKG} repo-add rtrouton-recipes
-${AUTOPKG} repo-add jleggat-recipes
-${AUTOPKG} repo-add timsutton-recipes
-${AUTOPKG} repo-add nmcspadden-recipes
-${AUTOPKG} repo-add jessepeterson-recipes
 
 ${DEFAULTS} write com.googlecode.munki.munkiimport editor "${TEXTEDITOR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
@@ -332,11 +290,6 @@ echo "AutoPkg Configured"
 
 # This makes AutoPkg useful on future runs for the admin user defined at the top. It copies & creates preferences for autopkg and munki into their home dir's Library folder, as well as transfers ownership for the ~/Library/AutoPkg folders to them.
 
-#cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Library/Preferences
-#cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences
-#chmod 660 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
-#chmod 660 ~/Library/Preferences/com.github.autopkg.plist
-
 plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
 
 ####
@@ -347,10 +300,6 @@ ${AUTOPKG} run -v ${AUTOPKGRUN}
 
 ${LOGGER} "AutoPkg Run"
 echo "AutoPkg has run"
-
-# Bring it on home to the all-powerful, all-wise, local admin... (Thanks Luis)
-# To be deleted if this rootless thing works.
-# chown -R ${ADMINUSERNAME} ~/Library/AutoPkg
 
 ####
 # Create new site_default manifest and add imported packages to it
@@ -386,21 +335,12 @@ ${AUTOPKG} run AutoPkgr.install
 ${LOGGER} "AutoPkgr Installed"
 echo "AutoPkgr Installed"
 
-mkdir /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
-touch /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr/recipe_list.txt
+mkdir ~/Library/Application\ Support/AutoPkgr
+touch ~/Library/Application\ Support/AutoPkgr/recipe_list.txt
 
-echo "com.github.autopkg.munki.FlashPlayerNoRepackage
-com.github.autopkg.munki.AdobeReader
-com.github.autopkg.munki.dropbox
-com.github.autopkg.munki.firefox-rc-en_US
+echo "com.github.autopkg.munki.firefox-rc-en_US
 com.github.autopkg.munki.google-chrome
-com.github.autopkg.munki.OracleJava8
-com.github.autopkg.munki.OracleJava7
-com.github.autopkg.munki.textwrangler
-com.github.autopkg.munki.munkitools2
-com.github.autopkg.munki.makecatalogs" > /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr/recipe_list.txt
-
-# chown -R $ADMINUSERNAME /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
+com.github.autopkg.munki.makecatalogs" > ~/Library/Application\ Support/AutoPkgr/recipe_list.txt
 
 ####
 # Install Munki Admin App by the amazing Hannes Juutilainen
@@ -409,59 +349,6 @@ com.github.autopkg.munki.makecatalogs" > /Users/$ADMINUSERNAME/Library/Applicati
 ${AUTOPKG} repo-add jleggat-recipes
 
 ${AUTOPKG} run MunkiAdmin.install
-
-####
-# Install Munki Enroll
-####
-
-cd "${REPODIR}"
-${GIT} clone https://github.com/edingc/munki-enroll.git
-mv munki-enroll munki-enroll-host
-mv munki-enroll-host/munki-enroll munki-enroll
-mv munki-enroll-host/Scripts/munki_enroll.sh munki-enroll
-sed -i.orig "s|/munki/|/${HOSTNAME}/|" munki-enroll/munki_enroll.sh
-
-####
-#  Install MunkiReport-PHP
-####
-
-cd "${WEBROOT}"
-${GIT} clone https://github.com/munkireport/munkireport-php.git
-MR_CONFIG="munkireport-php/config.php"
-MR_BASEURL="https://$HOSTNAME/munkireport-php/index.php?"
-MR_DB_DIR="/var/munkireport"
-
-# Create database directory
-sudo mkdir -p $MR_DB_DIR
-sudo chmod +a "_www allow add_file,delete_child" $MR_DB_DIR
-
-echo "<?php" > ${MR_CONFIG}
-echo >> ${MR_CONFIG}
-echo "\$conf['pdo_dsn'] = 'sqlite:$MR_DB_DIR/db.sqlite';" >> ${MR_CONFIG}
-
-sudo echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
-# This creates a user "root" with password "root"
-echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> ${MR_CONFIG}
-
-# Now to download the pkgsinfo file into the right place and add it to the catalogs and site_default manifest:
-
-echo "Downloading available modules"
-
-curl -k -L "$MR_BASEURL/install/dump_modules/config" >> ${MR_CONFIG}
-
-echo "Creating the MunkiReport Client installer package"
-
-bash -c "$(curl -k -L $MR_BASEURL/install)" bash -i ${REPOLOC}
-
-echo "Importing the munkireport Client installer package"
-
-$MUNKILOC/munkiimport -n "$REPOLOC/munkireport-"*.pkg
-
-echo "Imported the MunkiReport Client installer package, Now Rebuilding Catalogs"
-
-/usr/local/munki/makecatalogs
-
-${MANU} add-pkg munkireport --manifest site_default
 
 ####
 # Clean Up When Done
@@ -484,6 +371,5 @@ echo "MunkiAdmin and AutoPkgr are ready to go, please launch them to complete th
 echo "#########"
 echo "MunkiAdmin needs to know where your repo is, and AutoPkgr needs to have its helper tool installed."
 echo "#########"
-echo "Be sure to login to MunkiReport-PHP at http://localhost/munkireport-php and initiate the database, as well change the login password."
 
 exit 0
