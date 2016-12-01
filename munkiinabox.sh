@@ -3,7 +3,7 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 1.5.0 - Basic Auth
+# Version: 1.5.1 - Basic Auth + AutoPkg 1.0/Trust
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
@@ -13,7 +13,7 @@
 
 # This script is based upon the Demonstration Setup Guide for Munki, AutoPkg, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski, Elliot Jordan, The Linde Group and numerous others who have helped me assemble this script.
 
-# Pre-Reqs for this script: 10.10/Server 4 or 10.11/Server 5.  Web Services should be turned on and PHP should be enabled. This script might work with 10.8 or later, but I'm only testing it on 10.10 or later.
+# Pre-Reqs for this script: 10.11/Server 5.  Web Services should be turned on and PHP should be enabled. This script might work with 10.8 or later, but I'm only testing it on 10.11 or later.
 
 # Establish our Basic Variables:
 
@@ -335,6 +335,16 @@ ${AUTOPKG} repo-add timsutton-recipes
 ${AUTOPKG} repo-add nmcspadden-recipes
 ${AUTOPKG} repo-add jessepeterson-recipes
 
+${AUTOPKG} make-override AdobeFlashPlayer.munki
+${AUTOPKG} make-override AdobeReader.munki
+${AUTOPKG} make-override Dropbox.munki
+${AUTOPKG} make-override Firefox.munki
+${AUTOPKG} make-override GoogleChrome.munki
+${AUTOPKG} make-override OracleJava7.munki
+${AUTOPKG} make-override TextWrangler.munki
+${AUTOPKG} make-override munkitools2.munki
+${AUTOPKG} make-override MakeCatalogs.munki
+
 ${DEFAULTS} write com.googlecode.munki.munkiimport editor "${TEXTEDITOR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
@@ -388,6 +398,7 @@ done
 ####
 # Install AutoPkgr from the awesome Linde Group!
 ####
+${AUTOPKG} make-override AutoPkgr.install
 
 ${AUTOPKG} run AutoPkgr.install
 
@@ -415,6 +426,8 @@ com.github.autopkg.munki.makecatalogs" > /Users/$ADMINUSERNAME/Library/Applicati
 ####
 
 ${AUTOPKG} repo-add jleggat-recipes
+
+${AUTOPKG} make-override MunkiAdmin.install
 
 ${AUTOPKG} run MunkiAdmin.install
 
