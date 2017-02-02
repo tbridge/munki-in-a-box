@@ -10,7 +10,7 @@ This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and 
 ###Pre-Requisites:
 
 1) 10.10/Server 4, 10.11/Server 5  
-2) Web services enabled
+2) Web services enabled 
 
 ###Directions for Use:
 
