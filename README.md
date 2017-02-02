@@ -58,11 +58,6 @@ Then you must add that configuration line into the config.php file in $WEBROOT/m
 
 For more information on munkireport-php, please be sure to [visit their documentation](https://github.com/munkireport/munkireport-php/blob/master/docs/setup.md).
 
-##Munki-enroll
-
-[Munki-enroll](https://github.com/edingc/munki-enroll) is a way to have your bootstrap munki clients end up with their very own manifest without you having to set it up yourself. This is not configured by default yet.
-
-
 ###Changelog
 
 **New in 1.5.1:**
