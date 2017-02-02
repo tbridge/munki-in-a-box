@@ -3,21 +3,21 @@
 # Munki In A Box
 # By Tom Bridge, Technolutionary LLC
 
-# Version: 1.4.0 - Non-Root Execution
+# Version: 1.5.1 - Basic Auth + AutoPkg 1.0/Trust
 
 # This software carries no guarantees, warranties or other assurances that it works. It may wreck your entire environment. That would be bad, mmkay. Backup, test in a VM, and bug report.
 
 # Approach this script like a swarm of bees: Unless you know what you are doing, keep your distance.
 
-# The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. There are default values in these variables, but they are easily overridden and you should decide what they should be.
+# The goal of this script is to deploy a basic munki repo, with SSL, and basic authentication, in a simple script based on a set of common variables. There are default values in these variables, but they are easily overridden and you should decide what they should be.
 
 # This script is based upon the Demonstration Setup Guide for Munki, AutoPkg, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Hannes Juutilainen, Sean Kaiser, Peter Bukowinski, Elliot Jordan, The Linde Group and numerous others who have helped me assemble this script.
 
-# Pre-Reqs for this script: 10.10/Server 4 or 10.11/Server 5.  Web Services should be turned on and PHP should be enabled. This script might work with 10.8 or later, but I'm only testing it on 10.10 or later.
+# Pre-Reqs for this script: 10.11/Server 5.  Web Services should be turned on and PHP should be enabled. This script might work with 10.8 or later, but I'm only testing it on 10.11 or later.
 
 # Establish our Basic Variables:
 
-REPOLOC="/Users/Shared"
+REPOLOC="/Library/Server/Web/Data/Sites/Default"
 REPONAME="munki_repo"
 REPODIR="${REPOLOC}/${REPONAME}"
 LOGGER="/usr/bin/logger -t Munki-in-a-Box"
@@ -30,14 +30,14 @@ TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools2.munki MakeCatalogs.munki"
+AUTOPKGARRAY=($AUTOPKGRUN)
 DEFAULTS="/usr/bin/defaults"
 AUTOPKG="/usr/local/bin/autopkg"
 MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
 SCRIPTDIR="/usr/local/bin"
-## Below are for Sean Kaiser's Scripts. Uncomment to Use.
-#AUTOPKGEMAIL="youraddress@domain.com"
-#AUTOPKGORGNAME="com.technolutionary"
+HTPASSWD="YouNeedToChangeThis"
+
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
 
@@ -115,11 +115,6 @@ if
     exit 5 # Web Root folder doesn't exist.
 fi
 
-# If we pass this point, the Repo gets linked:
-
-    ln -s "${REPODIR}" "${WEBROOT}"
-
-    ${LOGGER} "The repo is now linked. ${REPODIR} now appears at ${WEBROOT}"
 
 if
     [[ ! -f $MUNKILOC/munkiimport ]]; then
@@ -197,7 +192,7 @@ if
 osx_vers=$(sw_vers -productVersion | awk -F "." '{print $2}')
 cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
  
-# Installing the latest Xcode command line tools on 10.9.x or 10.10.x
+# Installing the latest Xcode command line tools on 10.9.x, 10.10.x or 10.11.x
  
 	if [[ "$osx_vers" -ge 9 ]] ; then
  
@@ -265,6 +260,7 @@ mkdir "${REPONAME}/catalogs"
 mkdir "${REPONAME}/manifests"
 mkdir "${REPONAME}/pkgs"
 mkdir "${REPONAME}/pkgsinfo"
+mkdir "${REPONAME}/icons"
 
 chmod -R a+rX,g+w "${REPONAME}" ## Thanks Arek!
 chown -R ${ADMINUSERNAME}:admin "${REPONAME}" ## Thanks Arek!
@@ -272,6 +268,24 @@ chown -R ${ADMINUSERNAME}:admin "${REPONAME}" ## Thanks Arek!
 ${LOGGER} "Repo Created"
 echo "Repo Created"
 
+####
+#	Let's do some .htpasswd work here
+####
+
+/bin/cat > "${REPONAME}/.htaccess" << 'HTPASSWDDONE'
+AuthType Basic
+AuthName "Munki Repository"
+AuthUserFile /Library/Server/Web/Data/Sites/Default/munki_repo/.htpasswd
+Require valid-user
+HTPASSWDDONE
+
+cd ${REPONAME}
+
+htpasswd -cb .htpasswd munki $HTPASSWD
+HTPASSAUTH=$(python -c 'import base64; print "Authorization: Basic %s" % base64.b64encode("munki:$HTPASSWD")')
+
+sudo chmod 640 .htaccess .htpasswd
+sudo chown _www:wheel .htaccess .htpasswd
 
 ####
 # Create a client installer pkg pointing to this repo. Thanks Nick!
@@ -287,7 +301,7 @@ fi
 mkdir -p /tmp/ClientInstaller/Library/Preferences/
 
 HOSTNAME=$(/bin/hostname)
-${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls.plist SoftwareRepoURL "http://$HOSTNAME/${REPONAME}"
+${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls SoftwareRepoURL "https://$HOSTNAME/${REPONAME}" && ${DEFAULTS} write /tmp/ClientInstaller/Library/Preferences/ManagedInstalls AdditionalHttpHeaders -array "$HTPASSAUTH"
 
 /usr/bin/pkgbuild --identifier com.munkiinabox.client.pkg --root /tmp/ClientInstaller ClientInstaller.pkg
 
@@ -332,25 +346,29 @@ echo "AutoPkg Configured"
 
 # This makes AutoPkg useful on future runs for the admin user defined at the top. It copies & creates preferences for autopkg and munki into their home dir's Library folder, as well as transfers ownership for the ~/Library/AutoPkg folders to them.
 
-#cp /var/root/Library/Preferences/com.googlecode.munki.munkiimport.plist ~/Library/Preferences
-#cp /var/root/Library/Preferences/com.github.autopkg.plist ~/Library/Preferences
-#chmod 660 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
-#chmod 660 ~/Library/Preferences/com.github.autopkg.plist
-
 plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plist
 
 ####
 # Get some Packages and Stuff them in Munki
 ####
 
+aLen=${#AUTOPKGARRAY[@]}
+echo "$aLen" "overrides to create"
+
+for (( j=0; j<aLen; j++));
+do
+    ${LOGGER} "Adding ${AUTOPKGARRAY[$j]} override"
+    ${AUTOPKG} make-override ${AUTOPKGARRAY[$j]} 
+    ${LOGGER} "Added ${AUTOPKGARRAY[$j]} override"
+done
+
 ${AUTOPKG} run -v ${AUTOPKGRUN}
+
 
 ${LOGGER} "AutoPkg Run"
 echo "AutoPkg has run"
 
 # Bring it on home to the all-powerful, all-wise, local admin... (Thanks Luis)
-# To be deleted if this rootless thing works.
-# chown -R ${ADMINUSERNAME} ~/Library/AutoPkg
 
 ####
 # Create new site_default manifest and add imported packages to it
@@ -380,6 +398,7 @@ done
 ####
 # Install AutoPkgr from the awesome Linde Group!
 ####
+${AUTOPKG} make-override AutoPkgr.install
 
 ${AUTOPKG} run AutoPkgr.install
 
@@ -389,37 +408,16 @@ echo "AutoPkgr Installed"
 mkdir /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
 touch /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr/recipe_list.txt
 
-echo "com.github.autopkg.munki.FlashPlayerNoRepackage
-com.github.autopkg.munki.AdobeReader
-com.github.autopkg.munki.dropbox
-com.github.autopkg.munki.firefox-rc-en_US
-com.github.autopkg.munki.google-chrome
-com.github.autopkg.munki.OracleJava8
-com.github.autopkg.munki.OracleJava7
-com.github.autopkg.munki.textwrangler
-com.github.autopkg.munki.munkitools2
+echo "com.github.autopkg.munki.munkitools2
 com.github.autopkg.munki.makecatalogs" > /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr/recipe_list.txt
-
-# chown -R $ADMINUSERNAME /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
 
 ####
 # Install Munki Admin App by the amazing Hannes Juutilainen
 ####
 
-${AUTOPKG} repo-add jleggat-recipes
+${AUTOPKG} make-override MunkiAdmin.install
 
 ${AUTOPKG} run MunkiAdmin.install
-
-####
-# Install Munki Enroll
-####
-
-cd "${REPODIR}"
-${GIT} clone https://github.com/edingc/munki-enroll.git
-mv munki-enroll munki-enroll-host
-mv munki-enroll-host/munki-enroll munki-enroll
-mv munki-enroll-host/Scripts/munki_enroll.sh munki-enroll
-sed -i.orig "s|/munki/|/${HOSTNAME}/|" munki-enroll/munki_enroll.sh
 
 ####
 #  Install MunkiReport-PHP
@@ -439,7 +437,6 @@ echo "<?php" > ${MR_CONFIG}
 echo >> ${MR_CONFIG}
 echo "\$conf['pdo_dsn'] = 'sqlite:$MR_DB_DIR/db.sqlite';" >> ${MR_CONFIG}
 
-sudo echo "short_open_tag = On" >> "${PHPROOT}/php.ini"
 # This creates a user "root" with password "root"
 echo "\$auth_config['root'] = '\$P\$BSQDsvw8vyCZxzlPaEiXNoP6CIlwzt/';" >> ${MR_CONFIG}
 
@@ -485,5 +482,7 @@ echo "#########"
 echo "MunkiAdmin needs to know where your repo is, and AutoPkgr needs to have its helper tool installed."
 echo "#########"
 echo "Be sure to login to MunkiReport-PHP at http://localhost/munkireport-php and initiate the database, as well change the login password."
+
+echo "Now go turn on Allow Overrides on in Advanced Settings in the Web Service."
 
 exit 0
