@@ -30,6 +30,7 @@ TEXTEDITOR="TextWrangler.app"
 osvers=$(sw_vers -productVersion | awk -F. '{print $2}') # Thanks Rich Trouton
 webstatus=$(serveradmin status web | awk '{print $3}') # Thanks Charles Edge
 AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki GoogleChrome.munki OracleJava7.munki TextWrangler.munki munkitools2.munki MakeCatalogs.munki"
+AUTOPKGARRAY=($AUTOPKGRUN)
 DEFAULTS="/usr/bin/defaults"
 AUTOPKG="/usr/local/bin/autopkg"
 MAINPREFSDIR="/Library/Preferences"
@@ -335,16 +336,6 @@ ${AUTOPKG} repo-add timsutton-recipes
 ${AUTOPKG} repo-add nmcspadden-recipes
 ${AUTOPKG} repo-add jessepeterson-recipes
 
-${AUTOPKG} make-override AdobeFlashPlayer.munki
-${AUTOPKG} make-override AdobeReader.munki
-${AUTOPKG} make-override Dropbox.munki
-${AUTOPKG} make-override Firefox.munki
-${AUTOPKG} make-override GoogleChrome.munki
-${AUTOPKG} make-override OracleJava7.munki
-${AUTOPKG} make-override TextWrangler.munki
-${AUTOPKG} make-override munkitools2.munki
-${AUTOPKG} make-override MakeCatalogs.munki
-
 ${DEFAULTS} write com.googlecode.munki.munkiimport editor "${TEXTEDITOR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport repo_path "${REPODIR}"
 ${DEFAULTS} write com.googlecode.munki.munkiimport pkginfo_extension .plist
@@ -361,14 +352,23 @@ plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plis
 # Get some Packages and Stuff them in Munki
 ####
 
+aLen=${#AUTOPKGARRAY[@]}
+echo "$aLen" "overrides to create"
+
+for (( j=0; j<aLen; j++));
+do
+    ${LOGGER} "Adding ${AUTOPKGARRAY[$j]} override"
+    ${AUTOPKG} make-override ${AUTOPKGARRAY[$j]} 
+    ${LOGGER} "Added ${AUTOPKGARRAY[$j]} override"
+done
+
 ${AUTOPKG} run -v ${AUTOPKGRUN}
+
 
 ${LOGGER} "AutoPkg Run"
 echo "AutoPkg has run"
 
 # Bring it on home to the all-powerful, all-wise, local admin... (Thanks Luis)
-# To be deleted if this rootless thing works.
-# chown -R ${ADMINUSERNAME} ~/Library/AutoPkg
 
 ####
 # Create new site_default manifest and add imported packages to it
@@ -408,39 +408,16 @@ echo "AutoPkgr Installed"
 mkdir /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
 touch /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr/recipe_list.txt
 
-echo "com.github.autopkg.munki.FlashPlayerNoRepackage
-com.github.autopkg.munki.AdobeReader
-com.github.autopkg.munki.dropbox
-com.github.autopkg.munki.firefox-rc-en_US
-com.github.autopkg.munki.google-chrome
-com.github.autopkg.munki.OracleJava8
-com.github.autopkg.munki.OracleJava7
-com.github.autopkg.munki.textwrangler
-com.github.autopkg.munki.munkitools2
+echo "com.github.autopkg.munki.munkitools2
 com.github.autopkg.munki.makecatalogs" > /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr/recipe_list.txt
-
-# chown -R $ADMINUSERNAME /Users/$ADMINUSERNAME/Library/Application\ Support/AutoPkgr
 
 ####
 # Install Munki Admin App by the amazing Hannes Juutilainen
 ####
 
-${AUTOPKG} repo-add jleggat-recipes
-
 ${AUTOPKG} make-override MunkiAdmin.install
 
 ${AUTOPKG} run MunkiAdmin.install
-
-####
-# Install Munki Enroll
-####
-
-cd "${REPODIR}"
-${GIT} clone https://github.com/edingc/munki-enroll.git
-mv munki-enroll munki-enroll-host
-mv munki-enroll-host/munki-enroll munki-enroll
-mv munki-enroll-host/Scripts/munki_enroll.sh munki-enroll
-sed -i.orig "s|/munki/|/${HOSTNAME}/|" munki-enroll/munki_enroll.sh
 
 ####
 #  Install MunkiReport-PHP

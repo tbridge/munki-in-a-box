@@ -65,6 +65,10 @@ For more information on munkireport-php, please be sure to [visit their document
 
 ###Changelog
 
+**New in 1.5.1:**
+
+• Added `autopkg make-override` commands to the script to reduce the number of warnings produced by the script. This will create local overrides for each of the default applications installed by the script, which will include trust information for these recipes by default. PLEASE read the [Autopkg recipe parent trust information page](https://github.com/autopkg/autopkg/wiki/Autopkg-and-recipe-parent-trust-info) on the Autopkg wiki.
+
 **New in 1.5.0:**
 
 • SSL Basic Authentication is now included by default. This will require a trusted certificate already in place on your Server, otherwise, you will need to add a second package with your certificate and a script to have it trusted by the System.keychain.  
