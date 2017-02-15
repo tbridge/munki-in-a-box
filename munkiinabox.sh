@@ -282,7 +282,8 @@ HTPASSWDDONE
 cd ${REPONAME}
 
 htpasswd -cb .htpasswd munki $HTPASSWD
-HTPASSAUTH=$(python -c 'import base64; print "Authorization: Basic %s" % base64.b64encode("munki:$HTPASSWD")')
+HTPASSAUTH=$(python -c "import base64; print \"Authorization: Basic %s\" % base64.b64encode(\"munki:$HTPASSWD\")")
+# Thanks to Mike Lynn for the fix
 
 sudo chmod 640 .htaccess .htpasswd
 sudo chown _www:wheel .htaccess .htpasswd
