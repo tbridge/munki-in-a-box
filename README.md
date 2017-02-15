@@ -5,7 +5,7 @@ Post Munki Install Simple Deployment Script
 
 The goal of this script is to deploy a basic munki repo in a simple script based on a set of common variables. I have placed defaults in these variables, but they are easily overridden and you should decide where they go.
 
-This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Pepijn Bruienne, the Linde Group and numerous others who have helped me assemble this script. The Mac Admins Community is supportive and awesome.
+This script is based upon the Demonstration Setup Guide for Munki, AutoPKG, and other sources. My sincerest thanks to Greg Neagle, Tim Sutton, Allister Banks, Rich Trouton, Charles Edge, Pepijn Bruienne, the Linde Group, Mike Lynn and numerous others who have helped me assemble this script. The Mac Admins Community is supportive and awesome.
 
 ###Pre-Requisites:
 
@@ -59,6 +59,10 @@ Then you must add that configuration line into the config.php file in $WEBROOT/m
 For more information on munkireport-php, please be sure to [visit their documentation](https://github.com/munkireport/munkireport-php/blob/master/docs/setup.md).
 
 ###Changelog
+
+**New in 1.5.2:**
+
+• Bug fix to the `htpasswd` section.
 
 **New in 1.5.1:**
 
