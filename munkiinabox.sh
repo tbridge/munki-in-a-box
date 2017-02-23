@@ -42,11 +42,11 @@ isadmin() { id -G $1 | grep -q -w 80 ; }
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
 
-if [[ ! isadmin($(whoami)) ]]; then
+if isadmin $(whoami) ; then
     ${LOGGER} "Privilege Escalation Allowed, Please Continue."
 else
     ${LOGGER} "Privilege Escalation Denied, User Cannot Sudo."
-    exit 6 "You are not an admin user, you need to do this an admin user."
+    exit 6 
 fi
 
 ${LOGGER} "Starting up..."
