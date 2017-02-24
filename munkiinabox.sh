@@ -38,7 +38,14 @@ ADMINUSERNAME="ladmin"
 SCRIPTDIR="/usr/local/bin"
 HTPASSWD="YouNeedToChangeThis"
 
-isadmin() { id -G $1 | grep -q -w 80 ; }
+isadmin() { 
+    # http://apple.stackexchange.com/questions/179527/check-if-an-os-x-user-is-an-administrator
+    if [[ -e /usr/bin/id ]]; then
+        id -G $1 | grep -q -w 80 ;
+    else
+        groups $1 | grep -q -w admin ;
+    fi
+}
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
 
