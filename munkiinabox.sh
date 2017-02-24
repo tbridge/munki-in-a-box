@@ -38,21 +38,22 @@ ADMINUSERNAME="ladmin"
 SCRIPTDIR="/usr/local/bin"
 HTPASSWD="YouNeedToChangeThis"
 
+isadmin() { 
+    # http://apple.stackexchange.com/questions/179527/check-if-an-os-x-user-is-an-administrator
+    if [[ -e /usr/bin/id ]]; then
+        id -G $1 | grep -q -w 80 ;
+    else
+        groups $1 | grep -q -w admin ;
+    fi
+}
 
 echo "Welcome to Munki-in-a-Box. We're going to get things rolling here with a couple of tests"'!'
 
-echo "First up: Are you an admin user? Enter your password below:"
-
-#Let's see if this works...
-#This isn't bulletproof, but this is a basic test.
-sudo whoami > /tmp/quickytest
-
-if
-	[[  `cat /tmp/quickytest` == "root" ]]; then
-	${LOGGER} "Privilege Escalation Allowed, Please Continue."
-	else
-	${LOGGER} "Privilege Escalation Denied, User Cannot Sudo."
-	exit 6 "You are not an admin user, you need to do this an admin user."
+if isadmin $(whoami) ; then
+    ${LOGGER} "Privilege Escalation Allowed, Please Continue."
+else
+    ${LOGGER} "Privilege Escalation Denied, User Cannot Sudo."
+    exit 6 
 fi
 
 ${LOGGER} "Starting up..."
