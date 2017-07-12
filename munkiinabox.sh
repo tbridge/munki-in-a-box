@@ -114,11 +114,11 @@ if [[ ! -f $MUNKILOC/munkiimport ]]; then
     cd ${REPOLOC}
     ${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
     MUNKI_LATEST=$(curl https://api.github.com/repos/munki/munki/releases/latest | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["assets"][0]["browser_download_url"]')
-    
+
     curl -L "${MUNKI_LATEST}" -o munki-latest1.pkg
-    
+
     # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
-    
+
     /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -159,72 +159,72 @@ if [[ ! -f $MUNKILOC/munkiimport ]]; then
 </array>
 </plist>
 MUNKICHOICESDONE
-    
+
     sudo /usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML "/tmp/com.github.munki-in-a-box.munkiinstall.xml" -pkg "munki-latest1.pkg" -target "/"
-    
+
     ${LOGGER} "Installed Munki Admin and Munki Core packages"
     echo "Installed Munki packages"
-    
+
 else
     ${LOGGER} "Munki was already installed, I think, so I'm moving on"
     echo "/usr/local/munki/munkiimport existed, so I am not reinstalling. Hope you really had Munki installed..."
-    
+
 fi
 
 # Check for 10.9 and 10.8 created here by Tim Sutton, for which I owe him a beer. Or six.
 
 if [[ ! -d /Applications/Xcode.app ]]; then
     echo "You need to install the Xcode command line tools. Let me get that for you, it'll just take a minute."
-    
+
     ###
     # This section written by Rich Trouton and embedded because he's awesome. Diet Coke++, Rich.
     ###
-    
+
     # Installing the Xcode command line tools on 10.7.x through 10.10.x
-    
+
     osx_vers=$(sw_vers -productVersion | awk -F "." '{print $2}')
     cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
-    
+
     # Installing the latest Xcode command line tools on 10.9.x, 10.10.x or 10.11.x
-    
+
     if [[ "$osx_vers" -ge 9 ]] ; then
-        
+
         # Create the placeholder file which is checked by the softwareupdate tool
         # before allowing the installation of the Xcode command line tools.
-        
+
         touch "$cmd_line_tools_temp_file"
-        
+
         # Find the last listed update in the Software Update feed with "Command Line Tools" in the name
-        
+
         cmd_line_tools=$(softwareupdate -l | awk '/\*\ Command Line Tools/ { $1=$1;print }' | tail -1 | sed 's/^[[ \t]]*//;s/[[ \t]]*$//;s/*//' | cut -c 2-)
-        
+
         #Install the command line tools
-        
+
         sudo softwareupdate -i "$cmd_line_tools" -v
-        
+
         # Remove the temp file
-        
+
         if [[ -f "$cmd_line_tools_temp_file" ]]; then
             rm "$cmd_line_tools_temp_file"
         fi
     fi
-    
+
     # Installing the latest Xcode command line tools on 10.7.x and 10.8.x
-    
+
     # on 10.7/10.8, instead of using the software update feed, the command line tools are downloaded
     # instead from public download URLs, which can be found in the dvtdownloadableindex:
     # https://devimages.apple.com.edgekey.net/downloads/xcode/simulators/index-3905972D-B609-49CE-8D06-51ADC78E07BC.dvtdownloadableindex
-    
+
     if [[ "$osx_vers" -eq 7 ]] || [[ "$osx_vers" -eq 8 ]]; then
-        
+
         if [[ "$osx_vers" -eq 7 ]]; then
             DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg
         fi
-        
+
         if [[ "$osx_vers" -eq 8 ]]; then
             DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2014.dmg
         fi
-        
+
         TOOLS=clitools.dmg
         curl "$DMGURL" -o "$TOOLS"
         TMPMOUNT=$(/usr/bin/mktemp -d /tmp/clitools.XXXX)
@@ -233,9 +233,9 @@ if [[ ! -d /Applications/Xcode.app ]]; then
         hdiutil detach "$TMPMOUNT"
         rm -rf "$TMPMOUNT"
         rm "$TOOLS"
-        
+
     fi
-    
+
 fi
 
 ###
