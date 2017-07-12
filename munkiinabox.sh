@@ -23,7 +23,6 @@ REPODIR="${REPOLOC}/${REPONAME}"
 LOGGER="/usr/bin/logger -t Munki-in-a-Box"
 MUNKILOC="/usr/local/munki"
 WEBROOT="/Library/Server/Web/Data/Sites/Default"
-PHPROOT="/Library/Server/Web/Config/php"
 GIT="/usr/bin/git"
 MANU="/usr/local/munki/manifestutil"
 TEXTEDITOR="TextWrangler.app"
@@ -33,9 +32,7 @@ AUTOPKGRUN="AdobeFlashPlayer.munki AdobeReader.munki Dropbox.munki Firefox.munki
 AUTOPKGARRAY=($AUTOPKGRUN)
 DEFAULTS="/usr/bin/defaults"
 AUTOPKG="/usr/local/bin/autopkg"
-MAINPREFSDIR="/Library/Preferences"
 ADMINUSERNAME="ladmin"
-SCRIPTDIR="/usr/local/bin"
 HTPASSWD="YouNeedToChangeThis"
 
 
