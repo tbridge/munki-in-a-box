@@ -47,12 +47,11 @@ echo "First up: Are you an admin user? Enter your password below:"
 #This isn't bulletproof, but this is a basic test.
 sudo whoami > /tmp/quickytest
 
-if
-	[[  `cat /tmp/quickytest` == "root" ]]; then
-	${LOGGER} "Privilege Escalation Allowed, Please Continue."
-	else
-	${LOGGER} "Privilege Escalation Denied, User Cannot Sudo."
-	exit 6 "You are not an admin user, you need to do this an admin user."
+if [[  `cat /tmp/quickytest` == "root" ]]; then
+    ${LOGGER} "Privilege Escalation Allowed, Please Continue."
+else
+    ${LOGGER} "Privilege Escalation Denied, User Cannot Sudo."
+    exit 6 "You are not an admin user, you need to do this an admin user."
 fi
 
 ${LOGGER} "Starting up..."
@@ -76,24 +75,21 @@ fn_terminate() {
 }
 trap 'fn_terminate' SIGINT
 
-if
-    [[ $osvers -lt 8 ]]; then
+if [[ $osvers -lt 8 ]]; then
     ${LOGGER} "Could not run because the version of the OS does not meet requirements"
     echo "Sorry, this is for Mac OS 10.8 or later."
     exit 2 # 10.8+ for the Web Root Location.
 fi
 
-if
-    [[ $osvers -lt 10 ]]; then
-    	echo "##################################################"
-    	echo "This script is intended for OS X 10.10 or later. It may work on 10.8 or 10.9, but the ride may be a bit bumpy, and things may not go quite the way the script intended them to go. In short, this is not supported, but it probably won't light anything on fire. Be aware."
-	echo "##################################################"
+if [[ $osvers -lt 10 ]]; then
+    echo "##################################################"
+    echo "This script is intended for OS X 10.10 or later. It may work on 10.8 or 10.9, but the ride may be a bit bumpy, and things may not go quite the way the script intended them to go. In short, this is not supported, but it probably won't light anything on fire. Be aware."
+    echo "##################################################"
 fi
 
 ${LOGGER} "Mac OS X 10.8 or later is installed."
 
-if
-    [[ $webstatus == *STOPPED* ]]; then
+if [[ $webstatus == *STOPPED* ]]; then
     ${LOGGER} "Could not run because the Web Service is stopped"
     echo "Please turn on Web Services in Server.app"
     exit 3 # Sorry, turn on the webserver.
@@ -101,148 +97,145 @@ fi
 
 ${LOGGER} "Web service is running."
 
-if
-    [[ $EUID -eq 0 ]]; then
-   $echo "This script is NOT MEANT to run as root. This script is meant to be run as an admin user. I'm going to quit now. Run me without the sudo, please."
+if [[ $EUID -eq 0 ]]; then
+    $echo "This script is NOT MEANT to run as root. This script is meant to be run as an admin user. I'm going to quit now. Run me without the sudo, please."
     exit 4 # Running as root.
 fi
 
 #${LOGGER} "Script is running as root."
 
-if
-    [[ ! -d "${WEBROOT}" ]]; then
+if [[ ! -d "${WEBROOT}" ]]; then
     echo "No web root exists at ${WEBROOT}. This might be because you don't have Server.app installed and configured."
     exit 5 # Web Root folder doesn't exist.
 fi
 
 
-if
-    [[ ! -f $MUNKILOC/munkiimport ]]; then
+if [[ ! -f $MUNKILOC/munkiimport ]]; then
     cd ${REPOLOC}
     ${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
     MUNKI_LATEST=$(curl https://api.github.com/repos/munki/munki/releases/latest | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["assets"][0]["browser_download_url"]')
     
     curl -L "${MUNKI_LATEST}" -o munki-latest1.pkg
     
-# Write a Choices XML file for the Munki package. Thanks Rich and Greg!
-
-     /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
-     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    # Write a Choices XML file for the Munki package. Thanks Rich and Greg!
+    
+    /bin/cat > "/tmp/com.github.munki-in-a-box.munkiinstall.xml" << 'MUNKICHOICESDONE'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <array>
-        <dict>
-                <key>attributeSetting</key>
-                <integer>1</integer>
-                <key>choiceAttribute</key>
-                <string>selected</string>
-                <key>choiceIdentifier</key>
-                <string>core</string>
-        </dict>
-        <dict>
-                <key>attributeSetting</key>
-                <integer>1</integer>
-                <key>choiceAttribute</key>
-                <string>selected</string>
-                <key>choiceIdentifier</key>
-                <string>admin</string>
-        </dict>
-        <dict>
-                <key>attributeSetting</key>
-                <integer>0</integer>
-                <key>choiceAttribute</key>
-                <string>selected</string>
-                <key>choiceIdentifier</key>
-                <string>app</string>
-        </dict>
-        <dict>
-                <key>attributeSetting</key>
-                <integer>0</integer>
-                <key>choiceAttribute</key>
-                <string>selected</string>
-                <key>choiceIdentifier</key>
-                <string>launchd</string>
-        </dict>
+<array>
+    <dict>
+        <key>attributeSetting</key>
+        <integer>1</integer>
+        <key>choiceAttribute</key>
+        <string>selected</string>
+        <key>choiceIdentifier</key>
+        <string>core</string>
+    </dict>
+    <dict>
+        <key>attributeSetting</key>
+        <integer>1</integer>
+        <key>choiceAttribute</key>
+        <string>selected</string>
+        <key>choiceIdentifier</key>
+        <string>admin</string>
+    </dict>
+    <dict>
+        <key>attributeSetting</key>
+        <integer>0</integer>
+        <key>choiceAttribute</key>
+        <string>selected</string>
+        <key>choiceIdentifier</key>
+        <string>app</string>
+    </dict>
+    <dict>
+        <key>attributeSetting</key>
+        <integer>0</integer>
+        <key>choiceAttribute</key>
+        <string>selected</string>
+        <key>choiceIdentifier</key>
+        <string>launchd</string>
+    </dict>
 </array>
 </plist>
 MUNKICHOICESDONE
-
+    
     sudo /usr/sbin/installer -dumplog -verbose -applyChoiceChangesXML "/tmp/com.github.munki-in-a-box.munkiinstall.xml" -pkg "munki-latest1.pkg" -target "/"
-
+    
     ${LOGGER} "Installed Munki Admin and Munki Core packages"
     echo "Installed Munki packages"
-
-    else
-        ${LOGGER} "Munki was already installed, I think, so I'm moving on"
-        echo "/usr/local/munki/munkiimport existed, so I am not reinstalling. Hope you really had Munki installed..."
-
+    
+else
+    ${LOGGER} "Munki was already installed, I think, so I'm moving on"
+    echo "/usr/local/munki/munkiimport existed, so I am not reinstalling. Hope you really had Munki installed..."
+    
 fi
 
 # Check for 10.9 and 10.8 created here by Tim Sutton, for which I owe him a beer. Or six.
 
-if
-    [[ ! -d /Applications/Xcode.app ]]; then
+if [[ ! -d /Applications/Xcode.app ]]; then
     echo "You need to install the Xcode command line tools. Let me get that for you, it'll just take a minute."
-
-###
-# This section written by Rich Trouton and embedded because he's awesome. Diet Coke++, Rich.
-###
-
-# Installing the Xcode command line tools on 10.7.x through 10.10.x
- 
-osx_vers=$(sw_vers -productVersion | awk -F "." '{print $2}')
-cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
- 
-# Installing the latest Xcode command line tools on 10.9.x, 10.10.x or 10.11.x
- 
-	if [[ "$osx_vers" -ge 9 ]] ; then
- 
-	# Create the placeholder file which is checked by the softwareupdate tool 
-	# before allowing the installation of the Xcode command line tools.
-	
-	touch "$cmd_line_tools_temp_file"
-	
-	# Find the last listed update in the Software Update feed with "Command Line Tools" in the name
-	
-	cmd_line_tools=$(softwareupdate -l | awk '/\*\ Command Line Tools/ { $1=$1;print }' | tail -1 | sed 's/^[[ \t]]*//;s/[[ \t]]*$//;s/*//' | cut -c 2-)
-	
-	#Install the command line tools
-	
-	sudo softwareupdate -i "$cmd_line_tools" -v
-	
-	# Remove the temp file
-	
-		if [[ -f "$cmd_line_tools_temp_file" ]]; then
-	  rm "$cmd_line_tools_temp_file"
-		fi
-	fi
- 
-# Installing the latest Xcode command line tools on 10.7.x and 10.8.x
- 
-# on 10.7/10.8, instead of using the software update feed, the command line tools are downloaded
-# instead from public download URLs, which can be found in the dvtdownloadableindex:
-# https://devimages.apple.com.edgekey.net/downloads/xcode/simulators/index-3905972D-B609-49CE-8D06-51ADC78E07BC.dvtdownloadableindex
- 
-	if [[ "$osx_vers" -eq 7 ]] || [[ "$osx_vers" -eq 8 ]]; then
- 
-		if [[ "$osx_vers" -eq 7 ]]; then
-	    DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg
-		fi
-	
-		if [[ "$osx_vers" -eq 8 ]]; then
-	     DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2014.dmg
-		fi
- 
-		TOOLS=clitools.dmg
-		curl "$DMGURL" -o "$TOOLS"
-		TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
-		hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
-		sudo installer -allowUntrusted -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
-		hdiutil detach "$TMPMOUNT"
-		rm -rf "$TMPMOUNT"
-		rm "$TOOLS"
-
-	fi
-
+    
+    ###
+    # This section written by Rich Trouton and embedded because he's awesome. Diet Coke++, Rich.
+    ###
+    
+    # Installing the Xcode command line tools on 10.7.x through 10.10.x
+    
+    osx_vers=$(sw_vers -productVersion | awk -F "." '{print $2}')
+    cmd_line_tools_temp_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
+    
+    # Installing the latest Xcode command line tools on 10.9.x, 10.10.x or 10.11.x
+    
+    if [[ "$osx_vers" -ge 9 ]] ; then
+        
+        # Create the placeholder file which is checked by the softwareupdate tool
+        # before allowing the installation of the Xcode command line tools.
+        
+        touch "$cmd_line_tools_temp_file"
+        
+        # Find the last listed update in the Software Update feed with "Command Line Tools" in the name
+        
+        cmd_line_tools=$(softwareupdate -l | awk '/\*\ Command Line Tools/ { $1=$1;print }' | tail -1 | sed 's/^[[ \t]]*//;s/[[ \t]]*$//;s/*//' | cut -c 2-)
+        
+        #Install the command line tools
+        
+        sudo softwareupdate -i "$cmd_line_tools" -v
+        
+        # Remove the temp file
+        
+        if [[ -f "$cmd_line_tools_temp_file" ]]; then
+            rm "$cmd_line_tools_temp_file"
+        fi
+    fi
+    
+    # Installing the latest Xcode command line tools on 10.7.x and 10.8.x
+    
+    # on 10.7/10.8, instead of using the software update feed, the command line tools are downloaded
+    # instead from public download URLs, which can be found in the dvtdownloadableindex:
+    # https://devimages.apple.com.edgekey.net/downloads/xcode/simulators/index-3905972D-B609-49CE-8D06-51ADC78E07BC.dvtdownloadableindex
+    
+    if [[ "$osx_vers" -eq 7 ]] || [[ "$osx_vers" -eq 8 ]]; then
+        
+        if [[ "$osx_vers" -eq 7 ]]; then
+            DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg
+        fi
+        
+        if [[ "$osx_vers" -eq 8 ]]; then
+            DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2014.dmg
+        fi
+        
+        TOOLS=clitools.dmg
+        curl "$DMGURL" -o "$TOOLS"
+        TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
+        hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
+        sudo installer -allowUntrusted -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
+        hdiutil detach "$TMPMOUNT"
+        rm -rf "$TMPMOUNT"
+        rm "$TOOLS"
+        
+    fi
+    
 fi
 
 ###
@@ -292,8 +285,7 @@ sudo chown _www:wheel .htaccess .htpasswd
 # Create a client installer pkg pointing to this repo. Thanks Nick!
 ####
 
-if
-    [[ ! -f /usr/bin/pkgbuild ]]; then
+if [[ ! -f /usr/bin/pkgbuild ]]; then
     ${LOGGER} "Pkgbuild is not installed."
     echo "Please install Xcode command line tools first."
     exit 0 # Gotta install the command line tools.
@@ -359,7 +351,7 @@ echo "$aLen" "overrides to create"
 for (( j=0; j<aLen; j++));
 do
     ${LOGGER} "Adding ${AUTOPKGARRAY[$j]} override"
-    ${AUTOPKG} make-override ${AUTOPKGARRAY[$j]} 
+    ${AUTOPKG} make-override ${AUTOPKGARRAY[$j]}
     ${LOGGER} "Added ${AUTOPKGARRAY[$j]} override"
 done
 
