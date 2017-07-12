@@ -47,7 +47,7 @@ echo "First up: Are you an admin user? Enter your password below:"
 #This isn't bulletproof, but this is a basic test.
 sudo whoami > /tmp/quickytest
 
-if [[  `cat /tmp/quickytest` == "root" ]]; then
+if [[  $(cat /tmp/quickytest) == "root" ]]; then
     ${LOGGER} "Privilege Escalation Allowed, Please Continue."
 else
     ${LOGGER} "Privilege Escalation Denied, User Cannot Sudo."
@@ -227,7 +227,7 @@ if [[ ! -d /Applications/Xcode.app ]]; then
         
         TOOLS=clitools.dmg
         curl "$DMGURL" -o "$TOOLS"
-        TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
+        TMPMOUNT=$(/usr/bin/mktemp -d /tmp/clitools.XXXX)
         hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT" -nobrowse
         sudo installer -allowUntrusted -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
         hdiutil detach "$TMPMOUNT"
