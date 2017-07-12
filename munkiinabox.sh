@@ -348,8 +348,7 @@ plutil -convert xml1 ~/Library/Preferences/com.googlecode.munki.munkiimport.plis
 aLen=${#AUTOPKGARRAY[@]}
 echo "$aLen" "overrides to create"
 
-for (( j=0; j<aLen; j++));
-do
+for (( j=0; j<aLen; j++)); do
     ${LOGGER} "Adding ${AUTOPKGARRAY[$j]} override"
     ${AUTOPKG} make-override ${AUTOPKGARRAY[$j]}
     ${LOGGER} "Added ${AUTOPKGARRAY[$j]} override"
@@ -381,8 +380,7 @@ echo "List of Packages for adding to repo:" ${listofpkgs[*]}
 tLen=${#listofpkgs[@]}
 echo "$tLen" " packages to install"
 
-for (( i=0; i<tLen; i++));
-do
+for (( i=0; i<tLen; i++)); do
     ${LOGGER} "Adding ${listofpkgs[$i]} to site_default"
     ${MANU} add-pkg ${listofpkgs[$i]} --manifest site_default
     ${LOGGER} "Added ${listofpkgs[$i]} to site_default"
