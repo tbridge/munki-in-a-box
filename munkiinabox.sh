@@ -108,7 +108,7 @@ fi
 
 
 if [[ ! -f $MUNKILOC/munkiimport ]]; then
-    cd ${REPOLOC}
+    cd "${REPOLOC}" || exit 1
     ${LOGGER} "Grabbing and Installing the Munki Tools Because They Aren't Present"
     MUNKI_LATEST=$(curl https://api.github.com/repos/munki/munki/releases/latest | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["assets"][0]["browser_download_url"]')
 
@@ -244,7 +244,7 @@ ${LOGGER} "All Tests Passed! On to the configuration."
 
 # Create the repo.
 
-cd "$REPOLOC"
+cd "$REPOLOC" || exit 1
 mkdir "${REPONAME}"
 mkdir "${REPONAME}/catalogs"
 mkdir "${REPONAME}/manifests"
@@ -269,7 +269,7 @@ AuthUserFile /Library/Server/Web/Data/Sites/Default/munki_repo/.htpasswd
 Require valid-user
 HTPASSWDDONE
 
-cd ${REPONAME}
+cd "${REPONAME}" || exit 1
 
 htpasswd -cb .htpasswd munki $HTPASSWD
 HTPASSAUTH=$(python -c "import base64; print \"Authorization: Basic %s\" % base64.b64encode(\"munki:$HTPASSWD\")")
@@ -411,7 +411,7 @@ ${AUTOPKG} run MunkiAdmin.install
 #  Install MunkiReport-PHP
 ####
 
-cd "${WEBROOT}"
+cd "${WEBROOT}" || exit 1
 ${GIT} clone https://github.com/munkireport/munkireport-php.git
 MR_CONFIG="munkireport-php/config.php"
 MR_BASEURL="https://$HOSTNAME/munkireport-php/index.php?"
